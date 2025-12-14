@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+application.yml
+D:\Full Stack App\Life-Flow\Backend\user_service\src\main\resources\application.yml
