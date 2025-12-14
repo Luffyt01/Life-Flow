@@ -1,6 +1,7 @@
 package com.project.user_service.service;
 
 import com.project.user_service.dto.LogInDto;
+import com.project.user_service.dto.ResetPasswordDto;
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
@@ -17,4 +18,8 @@ public interface UserService  {
     String refreshToken(String refreshToken);
 
     UserEntity save(UserEntity newUser);
+
+    void forgetPasswordRequest(String email);
+
+    void resetPasswordRequest(String token, ResetPasswordDto resetPasswordDto);
 }

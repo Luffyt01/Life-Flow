@@ -1,6 +1,7 @@
 package com.project.user_service.service.imp;
 
 import com.project.user_service.dto.LogInDto;
+import com.project.user_service.dto.ResetPasswordDto;
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
@@ -97,5 +98,28 @@ public class UserServiceImp implements UserService {
     @Override
     public UserEntity save(UserEntity newUser) {
         return userRepository.save(newUser);
+    }
+
+    @Override
+    public void forgetPasswordRequest(String email) {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        if(user == null){
+             throw new UserOperationException("User not found with email: " + email);
+        }
+        // Todo send email  to user
+
+        return;
+
+    }
+
+    @Override
+    public void resetPasswordRequest(String token, ResetPasswordDto resetPasswordDto) {
+     UserEntity user = userRepository.findByEmail(resetPasswordDto.getEmail()).orElse(null);
+     if(user == null){
+         throw new UserOperationException("User not found with email: " + token);
+     }
+     user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
+     userRepository.save(user);
+     return;
     }
 }

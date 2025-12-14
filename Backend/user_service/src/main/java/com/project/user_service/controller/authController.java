@@ -1,9 +1,6 @@
 package com.project.user_service.controller;
 
-import com.project.user_service.dto.LogInDto;
-import com.project.user_service.dto.LoginResponseDto;
-import com.project.user_service.dto.SignupDto;
-import com.project.user_service.dto.UserDto;
+import com.project.user_service.dto.*;
 import com.project.user_service.exception.ExceptionType.UserOperationException;
 import com.project.user_service.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -11,16 +8,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
@@ -72,4 +66,20 @@ public class authController {
 
         return ResponseEntity.ok(new LoginResponseDto(accessToken));
     }
+
+    @PostMapping("/forget-password")
+    public ResponseEntity<String> forgetPasswordRequest(@RequestBody String email){
+        userService.forgetPasswordRequest(email);
+        return ResponseEntity.ok("Password reset email sent successfully");
+
+    }
+
+    @GetMapping("/reset-password")
+    public ResponseEntity<String> resetPasswordRequest(@RequestParam String token, @RequestBody ResetPasswordDto resetPasswordDto){
+        userService.resetPasswordRequest(token, resetPasswordDto);
+        return ResponseEntity.ok("Password reset successfully");
+
+    }
+
+
 }
