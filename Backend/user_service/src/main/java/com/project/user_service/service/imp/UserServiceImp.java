@@ -1,12 +1,12 @@
 package com.project.user_service.service.imp;
 
 import com.project.user_service.dto.LogInDto;
-import com.project.user_service.dto.ResetPasswordDto;
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
 import com.project.user_service.entities.enums.Status;
 import com.project.user_service.exception.ExceptionType.ResourceNotFoundException;
+import com.project.user_service.exception.ExceptionType.TokenExpireException;
 import com.project.user_service.exception.ExceptionType.UserOperationException;
 import com.project.user_service.repositories.UserRepository;
 import com.project.user_service.security.JwtService;
@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class UserServiceImp implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final EmailSendServiceImp emailSendServiceImp;
 
     @Override
     public String[] logInRequest(LogInDto logInDto ) {
@@ -59,17 +61,23 @@ public class UserServiceImp implements UserService {
             throw new UserOperationException("User with email " + signupDto.getEmail() + " already exists" );
         }
         UserEntity userEntity = modelMapper.map(signupDto, UserEntity.class);
+            String token = UUID.randomUUID().toString();
 
         userEntity.setEmail_verified(false);
         userEntity.setProfile_complete(false);
         userEntity.setCreatedAt(LocalDateTime.now());
         userEntity.setStatus(Status.PENDING_VERIFICATION);
+            userEntity.setVerificationToken(token);
+            userEntity.setVerifyTokenExpireAt(LocalDateTime.now().plusMinutes(15));
 
         //  password hashing
         userEntity.setPassword(passwordEncoder.encode(signupDto.getPassword()));
 
         UserEntity savedUser = userRepository.save(userEntity);
-        return modelMapper.map(savedUser, UserDto.class);
+
+            emailSendServiceImp.sendVerificationEmail(userEntity.getEmail(), token);
+
+            return modelMapper.map(savedUser, UserDto.class);
         }
         catch (UserOperationException e){
             throw e;
@@ -77,7 +85,28 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public UserEntity getUserById(Long id) {
+    public void verifyUser(String token, String email) {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            throw new UserOperationException("User not found with email: " + email);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if ((now.isAfter(user.getVerifyTokenExpireAt()))) {
+            throw new TokenExpireException("VerificationToken is expired");
+        }
+        if (!token.equals(user.getVerificationToken())) {
+            throw new TokenExpireException("VerificationToken is invalid");
+        }
+        user.setVerificationToken(null);
+        user.setVerifyTokenExpireAt(null);
+        user.setStatus(Status.ACTIVE);
+        user.setEmail_verified(true);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserEntity getUserById(UUID id) {
         return userRepository.findById(id).orElse(null);
     }
 
@@ -88,7 +117,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public String refreshToken(String refreshToken) {
-        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        UUID userId = jwtService.getUserIdFromToken(refreshToken);
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found " +
                 "with id: "+userId));
 
@@ -100,26 +129,5 @@ public class UserServiceImp implements UserService {
         return userRepository.save(newUser);
     }
 
-    @Override
-    public void forgetPasswordRequest(String email) {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-        if(user == null){
-             throw new UserOperationException("User not found with email: " + email);
-        }
-        // Todo send email  to user
 
-        return;
-
-    }
-
-    @Override
-    public void resetPasswordRequest(String token, ResetPasswordDto resetPasswordDto) {
-     UserEntity user = userRepository.findByEmail(resetPasswordDto.getEmail()).orElse(null);
-     if(user == null){
-         throw new UserOperationException("User not found with email: " + token);
-     }
-     user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
-     userRepository.save(user);
-     return;
-    }
 }

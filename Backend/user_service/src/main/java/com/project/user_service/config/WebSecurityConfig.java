@@ -24,7 +24,7 @@ public class WebSecurityConfig {
 
 
        @Bean
-    SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity, JwtAuthFilter jwtAuthFilter){
+    SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity){
         httpSecurity.authorizeHttpRequests(auth ->
                 auth.requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated())

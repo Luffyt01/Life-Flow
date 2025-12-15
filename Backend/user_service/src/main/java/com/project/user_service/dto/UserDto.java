@@ -1,11 +1,11 @@
 package com.project.user_service.dto;
 
 import com.project.user_service.entities.enums.UserRole;
-
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @Getter
@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 
 public class UserDto {
-        private Long id;
+    private UUID id;
         private String email;
         private String password;
         private Number phoneNo;

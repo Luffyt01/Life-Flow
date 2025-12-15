@@ -1,16 +1,16 @@
 package com.project.user_service.security;
 
-
 import com.project.user_service.entities.UserEntity;
 import io.jsonwebtoken.Claims;
+import java.nio.charset.StandardCharsets;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -41,14 +41,14 @@ public class JwtService {
                 .compact();
     }
 
-    public Long getUserIdFromToken(String token){
-        Claims claims= Jwts.parser()
+    public UUID getUserIdFromToken(String token) {
+        Claims claims = Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
 
-        return Long.valueOf(claims.getSubject());
+        return UUID.fromString(claims.getSubject());
     }
 
 

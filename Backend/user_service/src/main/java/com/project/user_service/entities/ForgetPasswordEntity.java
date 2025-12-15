@@ -1,25 +1,34 @@
 package com.project.user_service.entities;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Data
+@Entity
+@Getter
+@Setter
+@Builder
+@Table(name= "forget_password_table")
 public class ForgetPasswordEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String token;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    private String forget_token;
 
-    @OneToOne
-    private UserEntity user;
+    // This is option
+//    @OneToOne
+//    private UserEntity user;
+
+//    @Column(name = "user_id")
+//    private Long userId;
+
+    private String email;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
     private LocalDateTime expiredAt;
+
 }

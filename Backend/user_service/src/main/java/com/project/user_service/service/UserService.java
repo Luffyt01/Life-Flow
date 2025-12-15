@@ -1,16 +1,20 @@
 package com.project.user_service.service;
 
 import com.project.user_service.dto.LogInDto;
-import com.project.user_service.dto.ResetPasswordDto;
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
+
+import java.util.UUID;
 
 public interface UserService  {
 
     String[] logInRequest(LogInDto logInDto);
      UserDto signUpRequest(SignupDto signupDto);
-     UserEntity getUserById(Long id);
+
+    void verifyUser(String token, String email);
+
+    UserEntity getUserById(UUID id);
 
     UserEntity loadUserByUsername(String userEmail);
 
@@ -19,7 +23,5 @@ public interface UserService  {
 
     UserEntity save(UserEntity newUser);
 
-    void forgetPasswordRequest(String email);
 
-    void resetPasswordRequest(String token, ResetPasswordDto resetPasswordDto);
 }

@@ -1,10 +1,6 @@
 package com.project.user_service.exception;
 
-import com.project.user_service.exception.ExceptionType.AuthenticationException;
-import com.project.user_service.exception.ExceptionType.ResourceNotFoundException;
-
-import com.project.user_service.exception.ExceptionType.RuntimeConflictException;
-import com.project.user_service.exception.ExceptionType.UserOperationException;
+import com.project.user_service.exception.ExceptionType.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,7 +33,7 @@ public class GlobalExceptionHandler  {
     @ExceptionHandler(UserOperationException.class)
     public ResponseEntity<ApiResponse<?>>  handleUserOperationException(UserOperationException ex){
         ApiError error = ApiError.builder()
-                .status(HttpStatus.FOUND)
+                .status(HttpStatus.NOT_FOUND)
                 .message(ex.getMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
@@ -47,6 +43,24 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleAuthenticationException(AuthenticationException ex){
         ApiError error = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
+                .message(ex.getMessage())
+                .build();
+        return buildApiErrorResponseEntity(error);
+    }
+
+    @ExceptionHandler(TokenExpireException.class)
+    public ResponseEntity<ApiResponse<?>> handleForgetPasswordTokenExpiredException(TokenExpireException ex) {
+        ApiError error = ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .message(ex.getMessage())
+                .build();
+        return buildApiErrorResponseEntity(error);
+    }
+
+    @ExceptionHandler(MailSendingErrorException.class)
+    public ResponseEntity<ApiResponse<?>> handleMailSendingErrorException(MailSendingErrorException ex) {
+        ApiError error = ApiError.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message(ex.getMessage())
                 .build();
         return buildApiErrorResponseEntity(error);

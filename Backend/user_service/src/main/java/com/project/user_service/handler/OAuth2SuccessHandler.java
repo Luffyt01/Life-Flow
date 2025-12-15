@@ -37,6 +37,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
         DefaultOAuth2User oAuth2User = (DefaultOAuth2User) token.getPrincipal();
 
+        if (oAuth2User == null) {
+            throw new RuntimeException("user auth login error");
+        }
         String email = oAuth2User.getAttribute("email");
 
         UserEntity user = userService.loadUserByUsername(email);
