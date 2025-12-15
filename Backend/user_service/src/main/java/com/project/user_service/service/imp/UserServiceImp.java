@@ -1,6 +1,5 @@
 package com.project.user_service.service.imp;
 
-import com.project.user_service.dto.LogInDto;
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
@@ -9,14 +8,10 @@ import com.project.user_service.exception.ExceptionType.ResourceNotFoundExceptio
 import com.project.user_service.exception.ExceptionType.TokenExpireException;
 import com.project.user_service.exception.ExceptionType.UserOperationException;
 import com.project.user_service.repositories.UserRepository;
-import com.project.user_service.security.JwtService;
 import com.project.user_service.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,23 +24,9 @@ public class UserServiceImp implements UserService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+
     private final EmailSendServiceImp emailSendServiceImp;
 
-    @Override
-    public String[] logInRequest(LogInDto logInDto ) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(logInDto.getEmail(), logInDto.getPassword())
-        );
-        if (!authentication.isAuthenticated()) {
-            throw new UserOperationException("Authentication failed for user: " + logInDto.getEmail());
-        }
-        UserEntity user = (UserEntity) authentication.getPrincipal();
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-        return new String[]{accessToken, refreshToken};
-    }
 
 
     @Transactional
@@ -105,9 +86,12 @@ public class UserServiceImp implements UserService {
         userRepository.save(user);
     }
 
+
+
     @Override
-    public UserEntity getUserById(UUID id) {
-        return userRepository.findById(id).orElse(null);
+    public UserEntity getUserById(String userId) {
+        return userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: "+userId));
     }
 
     @Override
@@ -115,14 +99,7 @@ public class UserServiceImp implements UserService {
         return userRepository.findByEmail(userEmail).orElse(null);
     }
 
-    @Override
-    public String refreshToken(String refreshToken) {
-        UUID userId = jwtService.getUserIdFromToken(refreshToken);
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found " +
-                "with id: "+userId));
 
-        return jwtService.generateAccessToken(user);
-    }
 
     @Override
     public UserEntity save(UserEntity newUser) {

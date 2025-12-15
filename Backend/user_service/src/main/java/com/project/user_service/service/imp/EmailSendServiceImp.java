@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 class EmailSendServiceImp implements EmailSendService {
     private final JavaMailSender javaMailSender;
+
     @Value("${frontend.url}")
     private String frontendUrl;
 

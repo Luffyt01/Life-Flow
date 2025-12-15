@@ -1,4 +1,4 @@
-package com.project.user_service.entities;
+    package com.project.user_service.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.user_service.entities.enums.Status;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name= "user_table",
+@Table(name= "users",
    indexes = {
    @Index(name = "idx_email",columnList = "email",unique = true)
 

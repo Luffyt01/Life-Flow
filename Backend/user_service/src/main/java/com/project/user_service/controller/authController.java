@@ -1,6 +1,7 @@
 package com.project.user_service.controller;
 
 import com.project.user_service.dto.*;
+import com.project.user_service.service.AuthService;
 import com.project.user_service.service.ForgetAndResetPassService;
 import com.project.user_service.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -27,6 +28,7 @@ public class authController {
     private String deployEnv;
 
     private final UserService userService;
+    private final AuthService authService;
     private final AuthenticationManager authenticationManager;
     private final ForgetAndResetPassService forgetAndResetPassService;
 
@@ -38,7 +40,7 @@ public class authController {
     }
     public ResponseEntity<LoginResponseDto> logInRequest(@RequestBody LogInDto logInDto, HttpServletRequest request, HttpServletResponse response){
 
-       String [] tokens = userService.logInRequest(logInDto);
+       String [] tokens = authService.logInRequest(logInDto);
        String accessToken = tokens[0];
        String refreshToken = tokens[1];
 
@@ -68,7 +70,7 @@ public class authController {
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new AuthenticationServiceException("Refresh token not found inside the Cookies"));
 
-        String accessToken = userService.refreshToken(refreshToken);
+        String accessToken = authService.refreshToken(refreshToken);
 
         return ResponseEntity.ok(new LoginResponseDto(accessToken));
     }

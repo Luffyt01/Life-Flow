@@ -31,8 +31,8 @@ public class JwtAuthFilter   extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserService userService;
 
-    @Autowired
-    @Qualifier("handlerExceptionResolver")
+
+
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
@@ -43,7 +43,7 @@ public class JwtAuthFilter   extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final UUID userId;
+        final String userId;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -53,7 +53,7 @@ public class JwtAuthFilter   extends OncePerRequestFilter {
         jwt = authHeader.split("Bearer ")[1];
 
         try {
-            userId = jwtService.getUserIdFromToken(jwt);
+            userId = String.valueOf(jwtService.getUserIdFromToken(jwt));
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserEntity userDetails = userService.getUserById(userId);

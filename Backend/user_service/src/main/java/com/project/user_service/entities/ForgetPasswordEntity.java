@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@Table(name= "forget_password_table")
+@Table(name= "forgetTable")
 public class ForgetPasswordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
