@@ -15,7 +15,7 @@ public interface UserService  {
     void verifyUser(String token, String email);
 
 
-
+    UserEntity getUserByEmail(String userEmail);
 
     UserEntity getUserById(String userId);
 

@@ -2,15 +2,17 @@ package com.project.user_service.service.imp;
 
 import com.project.user_service.exception.ExceptionType.MailSendingErrorException;
 import com.project.user_service.service.EmailSendService;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-class EmailSendServiceImp implements EmailSendService {
+public class EmailSendServiceImp implements EmailSendService {
     private final JavaMailSender javaMailSender;
 
     @Value("${frontend.url}")
@@ -18,7 +20,7 @@ class EmailSendServiceImp implements EmailSendService {
 
     @Override
     public void sendVerificationEmail(String toEmail, String token) {
-        String url = frontendUrl + "/verify?token=" + token + "&email=" + toEmail;
+        String url = frontendUrl + "/auth/verify?token=" + token + "&email=" + toEmail;
 
         String subject = "Verify Your Life-Flow Account";
         String body = "<!DOCTYPE html>\n" +
@@ -87,17 +89,18 @@ class EmailSendServiceImp implements EmailSendService {
                 "</body>\n" +
                 "</html>";
         try {
-
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-
-            simpleMailMessage.setTo(toEmail);
-            simpleMailMessage.setSubject(subject);
-            simpleMailMessage.setText(body);
-
-            javaMailSender.send(simpleMailMessage);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom("rockysheoran72@gmail.com");
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(body, true); // true indicates HTML content
+            
+            javaMailSender.send(message);
         } catch (Exception e) {
-//            throw new MailSendingErrorException(e.getMessage());
-            throw new MailSendingErrorException("Mail Sending Error");
+            System.out.println("Error sending email: " + e);
+            throw new MailSendingErrorException("Mail Sending Error: " + e.getMessage());
         }
 
 
@@ -173,13 +176,14 @@ class EmailSendServiceImp implements EmailSendService {
                 "        <p>Best regards,<br>The Life-Flow Team</p>\n" +
                 "    </div>\n" +
                 "    <div class=\"footer\">\n" +
-                "        <p>© 2025 Life-Flow. All rights reserved.</p>\n" +
+                "        <p> 2025 Life-Flow. All rights reserved.</p>\n" +
                 "        <p>This is an automated message, please do not reply to this email.</p>\n" +
                 "    </div>\n" +
                 "</body>\n" +
                 "</html>";
         try {
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            simpleMailMessage.setFrom("rockysheoran72@gmail.com");
             simpleMailMessage.setTo(toEmail);
             simpleMailMessage.setSubject(subject);
             simpleMailMessage.setText(body);

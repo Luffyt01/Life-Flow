@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class UserServiceApplication {
 
 	public static void main(String[] args) {
+
+		System.out.println("Hello from TestOut");
 		SpringApplication.run(UserServiceApplication.class, args);
 	}
-
 }

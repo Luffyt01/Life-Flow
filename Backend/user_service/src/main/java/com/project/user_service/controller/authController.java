@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,74 +20,152 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 
 
+/**
+ * Controller handling authentication related endpoints including signup, login, verification,
+ * password reset, and token refresh operations.
+ */
+@Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(path = "/auth")
 @RequiredArgsConstructor
 public class authController {
 
+    // Deployment environment (e.g., production, development)
     @Value("${deploy.env}")
     private String deployEnv;
 
+    // Service dependencies
     private final UserService userService;
     private final AuthService authService;
     private final AuthenticationManager authenticationManager;
     private final ForgetAndResetPassService forgetAndResetPassService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<UserDto> signUpRequest(@RequestBody @Valid SignupDto signupDto){
+    @GetMapping(path = "/demo")
+     public ResponseEntity<String> demo(){
+         return ResponseEntity.ok("demo");
+     }
+
+    /**
+     * Handles user registration requests.
+     *
+     * @param signupDto The DTO containing user registration details
+     * @return ResponseEntity containing the created user's DTO and HTTP status
+     */
+    @PostMapping(path="/signup")
+    public ResponseEntity<String> signUpRequest(@RequestBody @Valid SignupDto signupDto) {
+        log.info("Received signup request for email: {}", signupDto.getEmail());
+        System.out.println("dsjkfsd");
         UserDto userDto = userService.signUpRequest(signupDto);
-
-        return new ResponseEntity<>(userDto, HttpStatus.CREATED);
+        log.debug("User registered successfully with ID: {}", userDto.getId());
+        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
-    public ResponseEntity<LoginResponseDto> logInRequest(@RequestBody LogInDto logInDto, HttpServletRequest request, HttpServletResponse response){
+    /**
+     * Handles user login requests and sets refresh token in HTTP-only cookie.
+     *
+     * @param logInDto The DTO containing login credentials
+     * @param request  The HTTP servlet request
+     * @param response The HTTP servlet response for setting cookies
+     * @return ResponseEntity containing the access token
+     */
+    @PostMapping(path="/login")
+    public ResponseEntity<LoginResponseDto> logInRequest(
+            @RequestBody LogInDto logInDto, 
+            HttpServletRequest request, 
+            HttpServletResponse response) {
+        log.debug("Login attempt for user: {}", logInDto.getEmail());
+        
+        // Authenticate and generate tokens
+        String[] tokens = authService.logInRequest(logInDto);
+        String accessToken = tokens[0];
+        String refreshToken = tokens[1];
 
-       String [] tokens = authService.logInRequest(logInDto);
-       String accessToken = tokens[0];
-       String refreshToken = tokens[1];
-
-        Cookie cookie = new Cookie("refreshToken",refreshToken);
-
-        // all cookies functionality uncomment in production
+        // Set refresh token in HTTP-only cookie
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setSecure("production".equals(deployEnv));
-
+        boolean isProduction = "production".equals(deployEnv);
+        cookie.setSecure(isProduction);
         response.addCookie(cookie);
-        return new ResponseEntity<>(new LoginResponseDto(accessToken),HttpStatus.OK);
+        
+        log.info("User logged in successfully: {}", logInDto.getEmail());
+        return new ResponseEntity<>(new LoginResponseDto(accessToken), HttpStatus.OK);
 
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<String> verifyUser(@RequestParam String token, @RequestParam String email) {
+    /**
+     * Verifies a user's email using the verification token.
+     *
+     * @param token The verification token sent to the user's email
+     * @param email The email of the user to verify
+     * @return ResponseEntity with success message
+     */
+    @GetMapping(path="/verify")
+    public ResponseEntity<String> verifyUser(
+            @RequestParam String token, 
+            @RequestParam String email) {
+        log.info("Verification request for email: {}", email);
         userService.verifyUser(token, email);
+        log.info("User verified successfully: {}", email);
         return ResponseEntity.ok("User verified successfully");
     }
 
-    @PostMapping("/refresh")
+    /**
+     * Refreshes the access token using a valid refresh token from cookies.
+     *
+     * @param request The HTTP servlet request containing the refresh token cookie
+     * @return ResponseEntity containing the new access token
+     * @throws AuthenticationServiceException if refresh token is not found in cookies
+     */
+    @PostMapping(path="/refresh")
     public ResponseEntity<LoginResponseDto> refresh(HttpServletRequest request) {
-        String refreshToken = Arrays.stream(request.getCookies()).
-                filter(cookie -> "refreshToken".equals(cookie.getName()))
+        log.debug("Processing token refresh request");
+        
+        // Extract refresh token from cookies
+        String refreshToken = Arrays.stream(request.getCookies())
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
-                .orElseThrow(() -> new AuthenticationServiceException("Refresh token not found inside the Cookies"));
+                .orElseThrow(() -> {
+                    log.warn("Refresh token not found in cookies");
+                    return new AuthenticationServiceException("Refresh token not found inside the Cookies");
+                });
 
+        // Generate new access token
         String accessToken = authService.refreshToken(refreshToken);
-
+        log.debug("Access token refreshed successfully");
+        
         return ResponseEntity.ok(new LoginResponseDto(accessToken));
     }
 
-    @PostMapping("/forget-password")
-    public ResponseEntity<String> forgetPasswordRequest(@RequestBody String email){
+    /**
+     * Initiates the password reset process by sending a reset link to the user's email.
+     *
+     * @param email The email address of the user requesting password reset
+     * @return ResponseEntity with success message
+     */
+    @PostMapping(path = "/forget-password")
+    public ResponseEntity<String> forgetPasswordRequest(@RequestBody String email) {
+        log.info("Password reset requested for email: {}", email);
         forgetAndResetPassService.forgetPasswordRequest(email);
+        log.debug("Password reset email sent to: {}", email);
         return ResponseEntity.ok("Password reset email sent successfully");
-
     }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPasswordRequest(@RequestParam String token, @RequestBody ResetPasswordDto resetPasswordDto){
+    /**
+     * Handles the password reset request with a valid reset token.
+     *
+     * @param token The password reset token
+     * @param resetPasswordDto DTO containing the new password
+     * @return ResponseEntity with success message
+     */
+    @PostMapping(path="/reset-password")
+    public ResponseEntity<String> resetPasswordRequest(
+            @RequestParam String token, 
+            @RequestBody ResetPasswordDto resetPasswordDto) {
+        log.debug("Processing password reset request with token");
         forgetAndResetPassService.resetPasswordRequest(token, resetPasswordDto);
+        log.info("Password reset successfully");
         return ResponseEntity.ok("Password reset successfully");
-
     }
 
 

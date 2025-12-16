@@ -19,6 +19,7 @@ public class ApiResponse<T> {
     }
 
     public ApiResponse(ApiError error) {
+
         this.error = error;
     }
 }

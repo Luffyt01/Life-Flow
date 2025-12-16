@@ -14,11 +14,12 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class UserDto {
-    private UUID id;
+        private UUID id;
         private String email;
+        private String fullName;
         private String password;
-        private Number phoneNo;
-        private Set<UserRole> roles;
+        private String phoneNo;
+        private UserRole role;
         private boolean email_verified;
         private  boolean profile_complete;
         private LocalDateTime createAt;

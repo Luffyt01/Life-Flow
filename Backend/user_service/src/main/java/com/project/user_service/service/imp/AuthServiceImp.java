@@ -8,6 +8,7 @@ import com.project.user_service.repositories.UserRepository;
 import com.project.user_service.security.JwtService;
 import com.project.user_service.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Configuration
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImp implements AuthService {

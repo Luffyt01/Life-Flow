@@ -17,7 +17,7 @@ import java.net.http.HttpClient;
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
-@EnableMethodSecurity
+//@EnableMethodSecurity(securedEnabled = true)
 public class WebSecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -27,7 +27,7 @@ public class WebSecurityConfig {
        @Bean
     SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity){
         httpSecurity.authorizeHttpRequests(auth ->
-                auth.requestMatchers("/auth/**").permitAll()
+                auth.requestMatchers("/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

@@ -46,7 +46,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         if(user == null) {
             UserEntity newUser = UserEntity.builder()
-                    .FullName(oAuth2User.getAttribute("name"))
+                    .fullName(oAuth2User.getAttribute("name"))
                     .email(email)
                     .build();
             user = userService.save(newUser);

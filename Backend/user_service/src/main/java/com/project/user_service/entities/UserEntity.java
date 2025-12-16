@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,13 +40,14 @@ public class UserEntity implements UserDetails {
 
     @Column(unique = true,nullable = false)
 
-    private String FullName;
+    private String fullName;
     private String email;
     private String password;
-    private Number phone;
+    private String phoneNo;
 
+//    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Set<UserRole> roles;
+    private UserRole role;
 
     private LocalDateTime createAt;
 
@@ -66,8 +68,8 @@ public class UserEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(role->new SimpleGrantedAuthority("ROLE_"+role.name()))
-                .collect(Collectors.toSet());
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.name()));
+
     }
 
     @Override
