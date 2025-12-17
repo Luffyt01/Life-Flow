@@ -3,8 +3,10 @@ package com.project.user_service.service.imp;
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
+import com.project.user_service.entities.enums.AuthProviderType;
 import com.project.user_service.entities.enums.Status;
 import com.project.user_service.exception.ExceptionType.ResourceNotFoundException;
+import com.project.user_service.exception.ExceptionType.RuntimeConflictException;
 import com.project.user_service.exception.ExceptionType.TokenExpireException;
 import com.project.user_service.exception.ExceptionType.UserOperationException;
 import com.project.user_service.repositories.UserRepository;
@@ -14,11 +16,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,7 +35,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImp implements UserService {
+public class UserServiceImp implements UserService, UserDetailsService {
 
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
@@ -48,16 +54,16 @@ public class UserServiceImp implements UserService {
      */
     @Transactional
     @Override
-    public UserDto signUpRequest(SignupDto signupDto) {
+    public void signUpRequest(SignupDto signupDto) {
         log.info("Processing signup request for email: {}", signupDto.getEmail());
 
         try {
             // Check if user with given email already exists
             UserEntity existingUser = userRepository.findByEmail(signupDto.getEmail()).orElse(null);
 
-            if ((existingUser != null) && existingUser.isEmail_verified()) {
+            if ((existingUser != null) && existingUser.isEmail_verified() && existingUser.getProvider().contains(AuthProviderType.GMAIL)) {
                 log.warn("Signup failed - User with email {} already exists", signupDto.getEmail());
-                throw new UserOperationException("User with email " + signupDto.getEmail() + " already exists");
+                throw new RuntimeConflictException("User with email " + signupDto.getEmail() + " already exists");
             }
 
             // Map DTO to entity and set up user properties
@@ -66,13 +72,27 @@ public class UserServiceImp implements UserService {
             LocalDateTime now = LocalDateTime.now();
 
             UserEntity savedUser=null;
-            if(existingUser != null){
+            if(existingUser != null && existingUser.getProvider().contains(AuthProviderType.GOOGLE)){
+              log.info("User already exists with Google provider");
+                userRepository.updatePassword(
+                        existingUser.getId(),
+                        now ,// update timestamp
+                        passwordEncoder.encode(signupDto.getPassword()),
+                        signupDto.getPhoneNo()
+                );
+                log.debug("User password updated successfully for ID: {}", existingUser.getId());
+            }
+            else if(existingUser != null && existingUser.getProvider().contains(AuthProviderType.GMAIL) ){
                 // OPTION 1: Use custom update query (Recommended)
+                log.info("User already exists with gmail provider");
                 userRepository.updateVerificationToken(
                         existingUser.getId(),
                         token,
                         now.plusMinutes(15),
-                        now // update timestamp
+                        now ,// update timestamp
+                        passwordEncoder.encode(signupDto.getPassword()),
+                        signupDto.getPhoneNo()
+
                 );
 //                userEntity.setVerificationToken(token);
 //                userEntity.setVerifyTokenExpireAt(now.plusMinutes(15));
@@ -85,7 +105,10 @@ public class UserServiceImp implements UserService {
                         .orElseThrow(() -> new UsernameNotFoundException("User not found after update"));
 
                 log.debug("User verification info updated successfully for ID: {}", savedUser.getId());
-            }else{
+            }
+
+            else{
+                log.info("User does not exist");
 
                 userEntity.setEmail_verified(false);
                 userEntity.setProfile_complete(false);
@@ -94,6 +117,7 @@ public class UserServiceImp implements UserService {
                 userEntity.setVerificationToken(token);
                 userEntity.setVerifyTokenExpireAt(now.plusMinutes(15));
                 userEntity.setPassword(passwordEncoder.encode(signupDto.getPassword()));
+                userEntity.setProvider(List.of(AuthProviderType.GMAIL));
                  savedUser = save(userEntity);
                 log.debug("User created successfully with ID: {}", savedUser.getId());
             }
@@ -103,10 +127,15 @@ public class UserServiceImp implements UserService {
             // Save user to database
 
             // Send verification email
-            emailSendServiceImp.sendVerificationEmail(userEntity.getEmail(), token);
-            log.info("Verification email sent to: {}", userEntity.getEmail());
+            if(existingUser ==null || !existingUser.isEmail_verified() ){
 
-            return modelMapper.map(savedUser, UserDto.class);
+                emailSendServiceImp.sendVerificationEmail(userEntity.getEmail(), token);
+                log.info("Verification email sent to: {}", userEntity.getEmail());
+            }
+
+
+
+            return ;
         } catch (Exception e) {
             log.error("Error during user registration: {}", e.getMessage(), e);
             throw e;
@@ -131,6 +160,11 @@ public class UserServiceImp implements UserService {
                     log.error("Verification failed - User not found with email: {}", email);
                     return new UserOperationException("User not found with email: " + email);
                 });
+        if(user.isEmail_verified()){
+            throw new RuntimeConflictException("User already verified");
+
+        }
+
 
         // Validate token expiration
         LocalDateTime now = LocalDateTime.now();
@@ -151,9 +185,11 @@ public class UserServiceImp implements UserService {
         user.setStatus(Status.ACTIVE);
         user.setEmail_verified(true);
 
-        userRepository.save(user);
+         save(user);
         log.info("User verified successfully: {}", email);
     }
+
+
 
 
 
@@ -190,23 +226,31 @@ public class UserServiceImp implements UserService {
                     return new ResourceNotFoundException("User not found with id: " + userId);
                 });
     }
-/**
+
+    /**
      * Loads a user by username (user ID in this case) for Spring Security.
      *
-     * @param userId The user ID as a string
+//     * @param userId The user ID as a string
      * @return The found UserEntity
      * @throws ResourceNotFoundException if no user is found with the given ID
      */
-    @Override
-    public UserEntity loadUserByUsername(String userId) {
-        log.debug("Loading user by username (ID): {}", userId);
-        return userRepository.findById(UUID.fromString(userId))
-                .orElseThrow(() -> {
-                    log.error("User not found with ID: {}", userId);
-                    return new ResourceNotFoundException("User not found with id: " + userId);
-                });
-    }
 
+//    @Override
+//    public UserDetails loadUserByUsername(String userId) {
+//        log.debug("Loading user by username (ID): {}", userId);
+//        return userRepository.findById(UUID.fromString(userId))
+//                .orElseThrow(() -> {
+//                    log.error("User not found with ID: {}", userId);
+//                    return new ResourceNotFoundException("User not found with id: " + userId);
+//                });
+//    }
+
+    @Transactional()
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new BadCredentialsException("Invalid credentials, user not found with email: "+username));
+    }
 
 
     /**

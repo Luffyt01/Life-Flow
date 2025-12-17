@@ -19,4 +19,5 @@ public class ResetPasswordDto {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
             message = "Password must contain at least 1 uppercase, 1 lowercase, 1 digit, and 1 special character")
     private String password;
+    private String token;
 }

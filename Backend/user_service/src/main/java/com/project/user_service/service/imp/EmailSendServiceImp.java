@@ -109,7 +109,7 @@ public class EmailSendServiceImp implements EmailSendService {
 
     @Override
     public void sendForgetPasswordEmail(String toEmail, String token) {
-        String url = frontendUrl + "/reset-password?token=" + token + "&email=" + toEmail;
+        String url = frontendUrl + "/auth/reset-password?token=" + token + "&email=" + toEmail;
         String subject = "Reset Your Life-Flow Password";
         String body = "<!DOCTYPE html>\n" +
                 "<html>\n" +
@@ -171,7 +171,7 @@ public class EmailSendServiceImp implements EmailSendService {
                 "        </p>\n" +
                 "        <p>Or copy and paste this link into your browser:</p>\n" +
                 "        <p><a href=\"" + url + "\">" + url + "</a></p>\n" +
-                "        <p class=\"warning\">This link will expire in 1 hour for security reasons.</p>\n" +
+                "        <p class=\"warning\">This link will expire in 15 min for security reasons.</p>\n" +
                 "        <p>If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>\n" +
                 "        <p>Best regards,<br>The Life-Flow Team</p>\n" +
                 "    </div>\n" +
@@ -182,12 +182,15 @@ public class EmailSendServiceImp implements EmailSendService {
                 "</body>\n" +
                 "</html>";
         try {
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            simpleMailMessage.setFrom("rockysheoran72@gmail.com");
-            simpleMailMessage.setTo(toEmail);
-            simpleMailMessage.setSubject(subject);
-            simpleMailMessage.setText(body);
-            javaMailSender.send(simpleMailMessage);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom("rockysheoran72@gmail.com");
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(body, true); // true indicates HTML content
+
+            javaMailSender.send(message);
         } catch (Exception e) {
             throw new MailSendingErrorException("Mail Sending Error");
         }

@@ -2,47 +2,119 @@ package com.project.user_service.service.imp;
 
 import com.project.user_service.dto.LogInDto;
 import com.project.user_service.entities.UserEntity;
+import com.project.user_service.exception.ExceptionType.AuthenticationException;
+import com.project.user_service.exception.ExceptionType.InvalidTokenException;
 import com.project.user_service.exception.ExceptionType.ResourceNotFoundException;
 import com.project.user_service.exception.ExceptionType.UserOperationException;
 import com.project.user_service.repositories.UserRepository;
 import com.project.user_service.security.JwtService;
 import com.project.user_service.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@Configuration
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImp implements AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImp.class);
+    
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+
+
     @Override
+    @Transactional
     public String[] logInRequest(LogInDto logInDto) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(logInDto.getEmail(), logInDto.getPassword())
-        );
-        if (!authentication.isAuthenticated()) {
-            throw new UserOperationException("Authentication failed for user: " + logInDto.getEmail());
+        logger.info("Attempting login for user: {}", logInDto.getEmail());
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(logInDto.getEmail(), logInDto.getPassword())
+            );
+            
+            if (!authentication.isAuthenticated()) {
+                logger.warn("Authentication failed for user: {}", logInDto.getEmail());
+                throw new UserOperationException("Authentication failed for user: " + logInDto.getEmail());
+            }
+            
+            UserEntity user = (UserEntity) authentication.getPrincipal();
+            logger.debug("User authenticated successfully: {}", user.getEmail());
+            
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+            
+            logger.info("Successfully generated tokens for user: {}", user.getEmail());
+            return new String[]{accessToken, refreshToken};
+        } catch (Exception e) {
+            logger.error("Error during login for user: {}", logInDto.getEmail(), e);
+            throw e;
         }
-        UserEntity user = (UserEntity) authentication.getPrincipal();
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-        return new String[]{accessToken, refreshToken};
     }
+
+
     @Override
     public String refreshToken(String refreshToken) {
-        String userId = jwtService.getUserIdFromToken(refreshToken);
-        UserEntity user = userRepository.findById(UUID.fromString(userId)).orElseThrow(() -> new ResourceNotFoundException("User not found " +
-                "with id: "+userId));
-
-        return jwtService.generateAccessToken(user);
+        logger.debug("Refreshing token");
+        try {
+            String userId = jwtService.getUserIdFromToken(refreshToken);
+            logger.debug("Extracted user ID from refresh token: {}", userId);
+            
+            UserEntity user = userRepository.findById(UUID.fromString(userId))
+                    .orElseThrow(() -> {
+                        logger.error("User not found with ID: {}", userId);
+                        return new ResourceNotFoundException("User not found with id: " + userId);
+                    });
+            
+            logger.info("Successfully generated new access token for user ID: {}", userId);
+            return jwtService.generateAccessToken(user);
+        } catch (Exception e) {
+            logger.error("Error refreshing token", e);
+            throw e;
+        }
     }
+
+    /**
+     * Logs out user by blacklisting their JWT token
+     * @param request HTTP request containing the authorization header
+     * @throws InvalidTokenException If token is missing or invalid
+     */
+    @Transactional
+    @Override
+    public void logout(HttpServletRequest request , HttpServletResponse response) {
+        try {
+            final String requestTokenHeader = request.getHeader("Authorization");
+
+            if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer")) {
+                throw new InvalidTokenException("Authorization header is missing or invalid");
+            }
+
+//            String token = requestTokenHeader.split("Bearer ")[1];
+            Cookie accessTokenCookie = new Cookie("refreshToken", null);
+             response.addCookie(accessTokenCookie);
+            SecurityContextHolder.clearContext();
+
+            logger.info("User logged out successfully");
+
+        } catch (InvalidTokenException e) {
+            logger.error("Invalid token during logout", e);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error during logout", e);
+            throw new AuthenticationException("Logout failed due to unexpected error");
+        }
+    }
+
 
 }

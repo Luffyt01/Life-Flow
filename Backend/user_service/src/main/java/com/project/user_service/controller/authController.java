@@ -17,7 +17,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -55,8 +58,8 @@ public class authController {
     public ResponseEntity<String> signUpRequest(@RequestBody @Valid SignupDto signupDto) {
         log.info("Received signup request for email: {}", signupDto.getEmail());
         System.out.println("dsjkfsd");
-        UserDto userDto = userService.signUpRequest(signupDto);
-        log.debug("User registered successfully with ID: {}", userDto.getId());
+       userService.signUpRequest(signupDto);
+        log.debug("User registered successfully");
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
     /**
@@ -91,7 +94,12 @@ public class authController {
         return new ResponseEntity<>(new LoginResponseDto(accessToken), HttpStatus.OK);
 
     }
+    // Get Google OAuth URL (if needed)
+    @GetMapping("/google")
+    public void getGoogleAuthUrl(HttpServletResponse response) throws IOException {
 
+        response.sendRedirect("http://localhost:8080/oauth2/authorization/google");
+    }
     /**
      * Verifies a user's email using the verification token.
      *
@@ -106,8 +114,17 @@ public class authController {
         log.info("Verification request for email: {}", email);
         userService.verifyUser(token, email);
         log.info("User verified successfully: {}", email);
-        return ResponseEntity.ok("User verified successfully");
+        return new ResponseEntity<>("User verified successfully",HttpStatus.OK);
     }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request,HttpServletResponse response){
+        authService.logout(request,response);
+        return ResponseEntity.ok("User logged out successfully");
+    }
+
+
 
     /**
      * Refreshes the access token using a valid refresh token from cookies.
@@ -118,7 +135,7 @@ public class authController {
      */
     @PostMapping(path="/refresh")
     public ResponseEntity<LoginResponseDto> refresh(HttpServletRequest request) {
-        log.debug("Processing token refresh request");
+        log.debug("Processing token refresh request",request.getCookies());
         
         // Extract refresh token from cookies
         String refreshToken = Arrays.stream(request.getCookies())
@@ -129,6 +146,7 @@ public class authController {
                     log.warn("Refresh token not found in cookies");
                     return new AuthenticationServiceException("Refresh token not found inside the Cookies");
                 });
+        log.debug("Refresh token extracted successfully",refreshToken);
 
         // Generate new access token
         String accessToken = authService.refreshToken(refreshToken);
@@ -140,30 +158,28 @@ public class authController {
     /**
      * Initiates the password reset process by sending a reset link to the user's email.
      *
-     * @param email The email address of the user requesting password reset
+     * @RequestBody email The email address of the user requesting password reset
      * @return ResponseEntity with success message
      */
     @PostMapping(path = "/forget-password")
-    public ResponseEntity<String> forgetPasswordRequest(@RequestBody String email) {
-        log.info("Password reset requested for email: {}", email);
-        forgetAndResetPassService.forgetPasswordRequest(email);
-        log.debug("Password reset email sent to: {}", email);
+    public ResponseEntity<String> forgetPasswordRequest(@RequestBody ForgetPasswordRequestDto forgetPasswordRequestDto) {
+        log.info("Password reset requested for email: {}", forgetPasswordRequestDto.getEmail());
+        forgetAndResetPassService.forgetPasswordRequest(forgetPasswordRequestDto.getEmail());
+        log.debug("Password reset email sent to: {}", forgetPasswordRequestDto.getEmail());
         return ResponseEntity.ok("Password reset email sent successfully");
     }
 
     /**
      * Handles the password reset request with a valid reset token.
      *
-     * @param token The password reset token
      * @param resetPasswordDto DTO containing the new password
      * @return ResponseEntity with success message
      */
     @PostMapping(path="/reset-password")
     public ResponseEntity<String> resetPasswordRequest(
-            @RequestParam String token, 
             @RequestBody ResetPasswordDto resetPasswordDto) {
         log.debug("Processing password reset request with token");
-        forgetAndResetPassService.resetPasswordRequest(token, resetPasswordDto);
+        forgetAndResetPassService.resetPasswordRequest(resetPasswordDto.getToken(), resetPasswordDto);
         log.info("Password reset successfully");
         return ResponseEntity.ok("Password reset successfully");
     }

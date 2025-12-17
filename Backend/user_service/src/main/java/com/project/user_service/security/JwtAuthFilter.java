@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +25,12 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
-@Configuration
+
 @Component
 @RequiredArgsConstructor
-public class JwtAuthFilter   extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
+    private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
     private final UserService userService;
@@ -41,37 +45,54 @@ public class JwtAuthFilter   extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userId;
+        final String requestUri = request.getRequestURI();
+        
+        logger.debug("Processing authentication for request: {}", requestUri);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            logger.trace("No JWT token found in request headers for {}", requestUri);
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.split("Bearer ")[1];
+        final String jwt = authHeader.substring(BEARER_PREFIX.length());
+        logger.trace("JWT token found in request");
 
         try {
-            userId = String.valueOf(jwtService.getUserIdFromToken(jwt));
+            String userId = String.valueOf(jwtService.getUserIdFromToken(jwt));
+            logger.debug("Successfully extracted user ID from JWT: {}", userId);
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                logger.debug("Authenticating user with ID: {}", userId);
+                
                 UserEntity userDetails = userService.getUserById(userId);
-
+                logger.debug("User details retrieved: {}", userDetails.getEmail());
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities()
                 );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
+                
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-
+                logger.info("Successfully authenticated user: {}", userDetails.getEmail());
             }
+            
+            logger.debug("Continuing filter chain for request: {}", requestUri);
             filterChain.doFilter(request, response);
 
+        } catch (ExpiredJwtException e) {
+            logger.error("JWT token is expired: {}", e.getMessage());
+            handlerExceptionResolver.resolveException(request, response, null, e);
+        } catch (MalformedJwtException e) {
+            logger.error("Invalid JWT token: {}", e.getMessage());
+            handlerExceptionResolver.resolveException(request, response, null, e);
+        } catch (SignatureException e) {
+            logger.error("JWT signature does not match: {}", e.getMessage());
+            handlerExceptionResolver.resolveException(request, response, null, e);
         } catch (Exception e) {
+            logger.error("Error processing JWT authentication: {}", e.getMessage(), e);
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
     }

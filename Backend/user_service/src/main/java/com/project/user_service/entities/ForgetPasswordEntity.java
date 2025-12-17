@@ -10,6 +10,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
 @Builder
 @Table(name= "forgetTable")
 public class ForgetPasswordEntity {
@@ -25,10 +26,15 @@ public class ForgetPasswordEntity {
 //    @Column(name = "user_id")
 //    private Long userId;
 
+    @Column(unique = true)
     private String email;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+    @CreationTimestamp
     private LocalDateTime expiredAt;
 
+    public ForgetPasswordEntity() {
+
+    }
 }

@@ -4,25 +4,16 @@ package com.project.user_service.service;
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
-
-import java.util.UUID;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService  {
 
 
-     UserDto signUpRequest(SignupDto signupDto);
-
+     void signUpRequest(SignupDto signupDto);
     void verifyUser(String token, String email);
-
-
     UserEntity getUserByEmail(String userEmail);
-
     UserEntity getUserById(String userId);
-
-    UserEntity loadUserByUsername(String userEmail);
-
-
-
+    UserDetails loadUserByUsername(String userEmail);
     UserEntity save(UserEntity newUser);
 
 

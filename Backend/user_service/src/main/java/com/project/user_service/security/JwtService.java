@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import java.nio.charset.StandardCharsets;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class JwtService {
 
     @Value("${jwt.secretKey}")
@@ -47,6 +49,7 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+        log.debug("Extracted user ID from token: {}", claims.getSubject());
 
         return claims.getSubject();
     }

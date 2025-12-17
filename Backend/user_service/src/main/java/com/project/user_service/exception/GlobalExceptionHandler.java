@@ -107,6 +107,16 @@ public class GlobalExceptionHandler  {
         return buildApiErrorResponseEntity(apiError);
     }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidTokenException(InvalidTokenException e){
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .message(e.getMessage())
+                .build();
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
+    }
+
+
     /**
      * Builds a consistent error response entity
      * @param error The ApiError containing status and message

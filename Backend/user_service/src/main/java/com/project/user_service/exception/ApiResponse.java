@@ -1,11 +1,13 @@
 package com.project.user_service.exception;
 
+
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
 public class ApiResponse<T> {
+
     private LocalDate timeStamp;
     private T data;
     private ApiError error;
@@ -15,6 +17,7 @@ public class ApiResponse<T> {
     }
 
     public ApiResponse(LocalDate timeStamp, T data) {
+        this.timeStamp = timeStamp;
         this.data = data;
     }
 

@@ -1,6 +1,7 @@
     package com.project.user_service.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.user_service.entities.enums.AuthProviderType;
 import com.project.user_service.entities.enums.Status;
 import com.project.user_service.entities.enums.UserRole;
 import jakarta.persistence.*;
@@ -12,13 +13,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
-@Entity
+    @Entity
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,20 +36,26 @@ public class UserEntity implements UserDetails {
     private UUID id;
 
     @Column(unique = true,nullable = false)
-
-    private String fullName;
     private String email;
+    @JoinColumn(unique = true, nullable = false)
+    private String fullName;
     private String password;
     private String phoneNo;
 
 //    @ElementCollection(fetch = FetchType.EAGER)
+
+    private LocalDateTime createAt;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+    private String verificationToken;
+
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    private LocalDateTime createAt;
+        @ElementCollection(fetch = FetchType.EAGER)
+        @Enumerated(EnumType.STRING)
+    private List<AuthProviderType> provider=new ArrayList<>();
 
-    private Status status;
-    private String verificationToken;
 
     @JsonProperty
     private boolean email_verified;
@@ -60,7 +63,7 @@ public class UserEntity implements UserDetails {
     private  boolean profile_complete;
     @CreationTimestamp
     private LocalDateTime createdAt;
-    @CurrentTimestamp
+
     private LocalDateTime verifyTokenExpireAt;
 
     private LocalDateTime updateAt;
