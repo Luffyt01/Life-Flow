@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 public class DonorProfile {
 
     @Id
-    @Column(length = 50)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String donorId;
 
     @Column(nullable = false, length = 50)
