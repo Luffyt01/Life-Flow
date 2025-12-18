@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -25,7 +26,7 @@ public class PointsTransaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String transactionId;
+    private UUID transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "donor_id", nullable = false)

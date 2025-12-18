@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -28,7 +29,7 @@ public class DonorGamification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String gamificationId;
+    private UUID gamificationId;
 
     @OneToOne
     @JoinColumn(name = "donor_id", unique = true)
