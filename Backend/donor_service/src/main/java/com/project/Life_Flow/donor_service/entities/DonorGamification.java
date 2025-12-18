@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(
         name = "donor_gamification",
         indexes = {
-                @Index(name = "idx_donor_id", columnList = "donor_id"),
+                @Index(name = "idx_gamification_donor_id", columnList = "donor_id"),
                 @Index(name = "idx_badge_level", columnList = "badgeLevel"),
                 @Index(name = "idx_top_donor_rank", columnList = "topDonorRank")
         }

@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "medical_history", indexes = {
-        @Index(name = "idx_donor_id", columnList = "donor_id")
+        @Index(name = "idx_medical_donor_id", columnList = "donor_id")
 })
 @Data
 @NoArgsConstructor

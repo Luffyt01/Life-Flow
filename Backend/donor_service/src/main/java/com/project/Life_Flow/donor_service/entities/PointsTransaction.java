@@ -14,7 +14,7 @@ import java.util.UUID;
 @Table(
         name = "points_transactions",
         indexes = {
-                @Index(name = "idx_donor_id", columnList = "donor_id"),
+                @Index(name = "idx_points_donor_id", columnList = "donor_id"),
                 @Index(name = "idx_transaction_date", columnList = "transactionDate")
         }
 )

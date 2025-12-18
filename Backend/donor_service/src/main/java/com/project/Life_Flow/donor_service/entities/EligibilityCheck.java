@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "eligibility_checks",
         indexes = {
-                @Index(name = "idx_donor_id", columnList = "donor_id"),
+                @Index(name = "idx_eligibility_donor_id", columnList = "donor_id"),
                 @Index(name = "idx_check_timestamp", columnList = "checkTimestamp")
         })
 public class EligibilityCheck {
