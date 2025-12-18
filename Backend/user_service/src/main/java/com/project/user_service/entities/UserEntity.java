@@ -1,19 +1,18 @@
     package com.project.user_service.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.project.user_service.entities.enums.AuthProviderType;
-import com.project.user_service.entities.enums.Status;
-import com.project.user_service.entities.enums.UserRole;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.CurrentTimestamp;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+    import com.fasterxml.jackson.annotation.JsonProperty;
+    import com.project.user_service.entities.enums.AuthProviderType;
+    import com.project.user_service.entities.enums.Status;
+    import com.project.user_service.entities.enums.UserRole;
+    import jakarta.persistence.*;
+    import lombok.*;
+    import org.hibernate.annotations.CreationTimestamp;
+    import org.springframework.security.core.GrantedAuthority;
+    import org.springframework.security.core.authority.SimpleGrantedAuthority;
+    import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
-import java.util.*;
+    import java.time.LocalDateTime;
+    import java.util.*;
 
     @Entity
 @Getter

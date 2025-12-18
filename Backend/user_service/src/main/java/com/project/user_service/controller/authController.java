@@ -100,7 +100,7 @@ public class authController {
     }
     // Get Google OAuth URL (if needed)
     @GetMapping("/google")
-    public void getGoogleAuthUrl(HttpServletResponse response) throws IOException {
+    public void GoogleAuthLogin(HttpServletResponse response) throws IOException {
         String url = backendUrl + "/oauth2/authorization/google";
         response.sendRedirect(url);
     }
@@ -129,7 +129,6 @@ public class authController {
         String message = "logout successfully";
         return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.OK);
     }
-
 
     /**
      * Refreshes the access token using a valid refresh token from cookies.

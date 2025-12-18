@@ -34,6 +34,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     @Value("${deploy.env}")
     private String deployEnv;
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -47,10 +49,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.debug("OAuth2 user attributes: {}", attributes);
 
         // Validate OAuth2 user
-        if (oAuth2User == null) {
-            log.error("OAuth2 user is null in authentication success handler");
-            throw new RuntimeException("OAuth2 authentication failed: User details not available");
-        }
 
         String email = oAuth2User.getAttribute("email");
         String registrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
@@ -70,7 +68,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         cookie.setSecure("production".equals(deployEnv));
         response.addCookie(cookie);
 
-        String frontEndUrl = "http://localhost:3000/?token="+accessToken;
+        String frontEndUrl = frontendUrl + "/?token="+accessToken;
 
 //        getRedirectStrategy().sendRedirect(request, response, frontEndUrl);
 
