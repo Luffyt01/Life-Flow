@@ -23,7 +23,7 @@ import java.util.UUID;
 @Builder
 @Table(name = "donation_history",
         indexes = {
-                @Index(name = "idx_donor_id", columnList = "donor_id"),
+                @Index(name = "idx_donation_donor_id", columnList = "donor_id"),
                 @Index(name = "idx_donation_date", columnList = "donationDate"),
                 @Index(name = "idx_blood_type_collected", columnList = "bloodTypeCollected")
         }
