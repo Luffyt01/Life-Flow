@@ -5,7 +5,7 @@ import com.project.user_service.entities.UserEntity;
 import com.project.user_service.security.JwtService;
 import com.project.user_service.service.AuthService;
 import com.project.user_service.service.UserService;
-import com.project.user_service.service.imp.oauthServiceImp;
+import com.project.user_service.service.imp.Oauth2ServiceImp;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +30,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final  UserService userService;
     private final JwtService jwtService;
-    private final oauthServiceImp oauthServiceImp;
+    private final Oauth2ServiceImp oauthServiceImp;
 
     @Value("${deploy.env}")
     private String deployEnv;

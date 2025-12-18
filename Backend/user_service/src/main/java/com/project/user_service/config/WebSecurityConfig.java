@@ -37,6 +37,7 @@ public class WebSecurityConfig {
             httpSecurity.authorizeHttpRequests(auth -> {
                         logger.debug("Configuring request matchers");
                         auth.requestMatchers("/**").permitAll()
+                                .requestMatchers("/auth/get-me").authenticated()
                                 .anyRequest().authenticated();
                     })
                     .csrf(csrf -> {

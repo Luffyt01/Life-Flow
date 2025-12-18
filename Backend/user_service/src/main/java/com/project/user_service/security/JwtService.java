@@ -24,6 +24,7 @@ public class JwtService {
     }
 
     public String generateAccessToken (UserEntity user){
+        log.debug("Generating access token for user: {}", user.getId());
         return Jwts.builder()
                 .subject(user.getId().toString())
                 .claim("email",user.getEmail())
@@ -35,6 +36,7 @@ public class JwtService {
     }
 
     public String generateRefreshToken(UserEntity user) {
+        log.debug("Generating refresh token for user: {}", user.getId());
         return Jwts.builder()
                 .subject(user.getId().toString())
                 .issuedAt(new Date())

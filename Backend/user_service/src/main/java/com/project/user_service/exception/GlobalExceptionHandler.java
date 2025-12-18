@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -109,6 +110,15 @@ public class GlobalExceptionHandler  {
 
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ApiError> handleInvalidTokenException(InvalidTokenException e){
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .message(e.getMessage())
+                .build();
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(SessionAuthenticationException.class)
+    public ResponseEntity<ApiError> handleSessionAuthenticationException(SessionAuthenticationException e){
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
                 .message(e.getMessage())

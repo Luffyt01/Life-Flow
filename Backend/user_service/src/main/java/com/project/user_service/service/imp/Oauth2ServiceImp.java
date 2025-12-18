@@ -11,7 +11,6 @@ import com.project.user_service.service.UserService;
 import com.project.user_service.utils.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class oauthServiceImp {
+public class Oauth2ServiceImp {
     private final AuthUtil authUtil;
     private final UserRepository userRepository;
     private final UserService userService;

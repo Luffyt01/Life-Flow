@@ -3,7 +3,10 @@ package com.project.user_service.service;
 
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
+import com.project.user_service.dto.passwordUpdateAfterGoogleLoginDto;
 import com.project.user_service.entities.UserEntity;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService  {
@@ -17,4 +20,7 @@ public interface UserService  {
     UserEntity save(UserEntity newUser);
 
 
+    void passwordUpdateAfterGoogleLogin(@Valid passwordUpdateAfterGoogleLoginDto passwordUpdateAfterGoogleLoginDto);
+
+    UserDto getUser(HttpServletRequest req);
 }

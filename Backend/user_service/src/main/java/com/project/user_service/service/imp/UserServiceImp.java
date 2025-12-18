@@ -2,20 +2,19 @@ package com.project.user_service.service.imp;
 
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
+import com.project.user_service.dto.passwordUpdateAfterGoogleLoginDto;
 import com.project.user_service.entities.UserEntity;
 import com.project.user_service.entities.enums.AuthProviderType;
 import com.project.user_service.entities.enums.Status;
-import com.project.user_service.exception.ExceptionType.ResourceNotFoundException;
-import com.project.user_service.exception.ExceptionType.RuntimeConflictException;
-import com.project.user_service.exception.ExceptionType.TokenExpireException;
-import com.project.user_service.exception.ExceptionType.UserOperationException;
+import com.project.user_service.exception.ExceptionType.*;
 import com.project.user_service.repositories.UserRepository;
+import com.project.user_service.security.JwtService;
 import com.project.user_service.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +42,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     private final EmailSendServiceImp emailSendServiceImp;
-
+    private final JwtService jwtService;
 
 
     /**
@@ -61,7 +61,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
             // Check if user with given email already exists
             UserEntity existingUser = userRepository.findByEmail(signupDto.getEmail()).orElse(null);
 
-            if ((existingUser != null) && existingUser.isEmail_verified() && existingUser.getProvider().contains(AuthProviderType.GMAIL)) {
+            if ((existingUser != null) && existingUser.isEmail_verified() && !existingUser.getProvider().contains(AuthProviderType.GMAIL)) {
                 log.warn("Signup failed - User with email {} already exists", signupDto.getEmail());
                 throw new RuntimeConflictException("User with email " + signupDto.getEmail() + " already exists");
             }
@@ -72,19 +72,9 @@ public class UserServiceImp implements UserService, UserDetailsService {
             LocalDateTime now = LocalDateTime.now();
 
             UserEntity savedUser=null;
-            if(existingUser != null && existingUser.getProvider().contains(AuthProviderType.GOOGLE)){
-              log.info("User already exists with Google provider");
-                userRepository.updatePassword(
-                        existingUser.getId(),
-                        now ,// update timestamp
-                        passwordEncoder.encode(signupDto.getPassword()),
-                        signupDto.getPhoneNo()
-                );
-                log.debug("User password updated successfully for ID: {}", existingUser.getId());
-            }
-            else if(existingUser != null && existingUser.getProvider().contains(AuthProviderType.GMAIL) ){
+            if (existingUser != null && existingUser.getProvider().contains(AuthProviderType.GMAIL)) {
                 // OPTION 1: Use custom update query (Recommended)
-                log.info("User already exists with gmail provider");
+                log.info("User already exists with Gmail provider but not verified");
                 userRepository.updateVerificationToken(
                         existingUser.getId(),
                         token,
@@ -94,6 +84,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
                         signupDto.getPhoneNo()
 
                 );
+                // 2nd option
 //                userEntity.setVerificationToken(token);
 //                userEntity.setVerifyTokenExpireAt(now.plusMinutes(15));
 //                userEntity.setEmail_verified(false);
@@ -101,10 +92,10 @@ public class UserServiceImp implements UserService, UserDetailsService {
 //                userEntity.setCreatedAt(now);
 //                userEntity.setStatus(Status.PENDING_VERIFICATION);
 //                userEntity.setPassword(passwordEncoder.encode(signupDto.getPassword()));
-                savedUser = userRepository.findById(existingUser.getId())
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found after update"));
+//                savedUser = userRepository.findById(existingUser.getId())
+//                        .orElseThrow(() -> new UsernameNotFoundException("User not found after update"));
 
-                log.debug("User verification info updated successfully for ID: {}", savedUser.getId());
+                log.debug("User verification info updated successfully for email: {}", existingUser.getEmail());
             }
 
             else{
@@ -190,8 +181,57 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
 
+    /**
+     *
+     * @param userInput include  email and password
+     *                  Find provider and add email provider
+     *                  Update the use with password and provider
+     */
 
 
+    @Override
+    public void passwordUpdateAfterGoogleLogin(passwordUpdateAfterGoogleLoginDto userInput) {
+        UserEntity user = getUserByEmail(userInput.getEmail());
+        List<AuthProviderType> providers = user.getProvider() != null ?
+                new ArrayList<>(user.getProvider()) : new ArrayList<>();
+
+        if (!providers.contains(AuthProviderType.GMAIL)) {
+            providers.add(AuthProviderType.GMAIL);
+        }
+
+        try {
+            log.info("User exit and update password");
+
+//            userRepository.updatePasswordAfterOauth2(
+//                    user.getId(),
+//                    passwordEncoder.encode(userInput.getPassword()),
+//                    providers
+//            );
+            user.setProvider(providers);
+            user.setPassword(passwordEncoder.encode(userInput.getPassword()));
+            save(user);
+            log.info("update user password successfully");
+        } catch (Exception e) {
+            throw new RuntimeException("Error while updating password ");
+        }
+    }
+
+    @Override
+    public UserDto getUser(HttpServletRequest req) {
+        String authorizedToken = req.getHeader("Authorization");
+
+        if (authorizedToken == null || !authorizedToken.startsWith("Bearer ")) {
+            throw new AuthenticationException("User not authenticate");
+        }
+        String token = authorizedToken.split("Bearer ")[1];
+
+        String id = jwtService.getUserIdFromToken(token);
+
+        UserEntity user = getUserById(id);
+
+        return modelMapper.map(user, UserDto.class);
+
+    }
 
     /**
      * Retrieves a user by their email address.

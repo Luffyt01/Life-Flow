@@ -37,6 +37,9 @@ public class authController {
     @Value("${deploy.env}")
     private String deployEnv;
 
+    @Value("${backend.url}")
+    private String backendUrl;
+
     // Service dependencies
     private final UserService userService;
     private final AuthService authService;
@@ -44,8 +47,8 @@ public class authController {
     private final ForgetAndResetPassService forgetAndResetPassService;
 
     @GetMapping(path = "/demo")
-     public ResponseEntity<String> demo(){
-         return ResponseEntity.ok("demo");
+    public ResponseEntity<Map<String, String>> demo() {
+        return new ResponseEntity<>(new HashMap<>(Map.of("message", "gfkjg")), HttpStatus.OK);
      }
 
     /**
@@ -55,12 +58,13 @@ public class authController {
      * @return ResponseEntity containing the created user's DTO and HTTP status
      */
     @PostMapping(path="/signup")
-    public ResponseEntity<String> signUpRequest(@RequestBody @Valid SignupDto signupDto) {
+    public ResponseEntity<ResponseStringDto> signUpRequest(@RequestBody @Valid SignupDto signupDto) {
         log.info("Received signup request for email: {}", signupDto.getEmail());
         System.out.println("dsjkfsd");
        userService.signUpRequest(signupDto);
         log.debug("User registered successfully");
-        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
+        String message = "User registered successfully";
+        return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.CREATED);
     }
     /**
      * Handles user login requests and sets refresh token in HTTP-only cookie.
@@ -97,8 +101,8 @@ public class authController {
     // Get Google OAuth URL (if needed)
     @GetMapping("/google")
     public void getGoogleAuthUrl(HttpServletResponse response) throws IOException {
-
-        response.sendRedirect("http://localhost:8080/oauth2/authorization/google");
+        String url = backendUrl + "/oauth2/authorization/google";
+        response.sendRedirect(url);
     }
     /**
      * Verifies a user's email using the verification token.
@@ -108,22 +112,23 @@ public class authController {
      * @return ResponseEntity with success message
      */
     @GetMapping(path="/verify")
-    public ResponseEntity<String> verifyUser(
+    public ResponseEntity<ResponseStringDto> verifyUser(
             @RequestParam String token, 
             @RequestParam String email) {
         log.info("Verification request for email: {}", email);
         userService.verifyUser(token, email);
         log.info("User verified successfully: {}", email);
-        return new ResponseEntity<>("User verified successfully",HttpStatus.OK);
+        String message = "User verified successfully";
+        return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.OK);
     }
-
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request,HttpServletResponse response){
+    public ResponseEntity<ResponseStringDto> logout(HttpServletRequest request, HttpServletResponse response) {
         authService.logout(request,response);
-        return ResponseEntity.ok("User logged out successfully");
-    }
 
+        String message = "logout successfully";
+        return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.OK);
+    }
 
 
     /**
@@ -133,7 +138,7 @@ public class authController {
      * @return ResponseEntity containing the new access token
      * @throws AuthenticationServiceException if refresh token is not found in cookies
      */
-    @PostMapping(path="/refresh")
+    @PostMapping(path = "/refresh-token")
     public ResponseEntity<LoginResponseDto> refresh(HttpServletRequest request) {
         log.debug("Processing token refresh request",request.getCookies());
         
@@ -155,6 +160,17 @@ public class authController {
         return ResponseEntity.ok(new LoginResponseDto(accessToken));
     }
 
+
+    @PostMapping("/password-update")
+    public ResponseEntity<ResponseStringDto> passwordUpdateAfterGoogleLogin(@RequestBody @Valid passwordUpdateAfterGoogleLoginDto passwordUpdateAfterGoogleLoginDto) {
+        log.info("Password update requested for email: {}", passwordUpdateAfterGoogleLoginDto.getEmail());
+        userService.passwordUpdateAfterGoogleLogin(passwordUpdateAfterGoogleLoginDto);
+        log.debug("Password updated successfully for email: {}", passwordUpdateAfterGoogleLoginDto.getEmail());
+        String message = "password update successfully";
+        return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.OK);
+    }
+
+
     /**
      * Initiates the password reset process by sending a reset link to the user's email.
      *
@@ -162,11 +178,13 @@ public class authController {
      * @return ResponseEntity with success message
      */
     @PostMapping(path = "/forget-password")
-    public ResponseEntity<String> forgetPasswordRequest(@RequestBody ForgetPasswordRequestDto forgetPasswordRequestDto) {
+    public ResponseEntity<ResponseStringDto> forgetPasswordRequest(@RequestBody ForgetPasswordRequestDto forgetPasswordRequestDto) {
         log.info("Password reset requested for email: {}", forgetPasswordRequestDto.getEmail());
         forgetAndResetPassService.forgetPasswordRequest(forgetPasswordRequestDto.getEmail());
         log.debug("Password reset email sent to: {}", forgetPasswordRequestDto.getEmail());
-        return ResponseEntity.ok("Password reset email sent successfully");
+
+        String message = "Password reset email sent successfully";
+        return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.OK);
     }
 
     /**
@@ -176,12 +194,21 @@ public class authController {
      * @return ResponseEntity with success message
      */
     @PostMapping(path="/reset-password")
-    public ResponseEntity<String> resetPasswordRequest(
+    public ResponseEntity<ResponseStringDto> resetPasswordRequest(
             @RequestBody ResetPasswordDto resetPasswordDto) {
         log.debug("Processing password reset request with token");
         forgetAndResetPassService.resetPasswordRequest(resetPasswordDto.getToken(), resetPasswordDto);
         log.info("Password reset successfully");
-        return ResponseEntity.ok("Password reset successfully");
+
+        String message = "Password reset successfully";
+        return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-me")
+    public ResponseEntity<UserDto> getUser(HttpServletRequest req) {
+        UserDto user = userService.getUser(req);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+
     }
 
 

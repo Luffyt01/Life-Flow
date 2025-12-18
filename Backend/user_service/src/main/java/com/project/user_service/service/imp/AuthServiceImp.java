@@ -20,7 +20,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -33,6 +32,7 @@ public class AuthServiceImp implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final SessionService sessionService;
 
 
     @Override
@@ -40,6 +40,11 @@ public class AuthServiceImp implements AuthService {
     public String[] logInRequest(LogInDto logInDto) {
         logger.info("Attempting login for user: {}", logInDto.getEmail());
         try {
+            UserEntity user1 = userRepository.findByEmail(logInDto.getEmail()).orElse(null);
+            if(user1 == null || !user1.isEmail_verified()){
+                throw new UserOperationException("Invalid credential");
+            }
+
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(logInDto.getEmail(), logInDto.getPassword())
             );
@@ -54,7 +59,9 @@ public class AuthServiceImp implements AuthService {
             
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
-            
+            logger.debug("Generated access token: {}", accessToken);
+            logger.debug("Generated refresh token: {}", refreshToken);
+            sessionService.generateNewSession(user, refreshToken);
             logger.info("Successfully generated tokens for user: {}", user.getEmail());
             return new String[]{accessToken, refreshToken};
         } catch (Exception e) {
@@ -69,6 +76,7 @@ public class AuthServiceImp implements AuthService {
         logger.debug("Refreshing token");
         try {
             String userId = jwtService.getUserIdFromToken(refreshToken);
+            sessionService.validateSession(refreshToken);
             logger.debug("Extracted user ID from refresh token: {}", userId);
             
             UserEntity user = userRepository.findById(UUID.fromString(userId))

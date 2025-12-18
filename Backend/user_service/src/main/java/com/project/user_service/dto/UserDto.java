@@ -4,7 +4,6 @@ import com.project.user_service.entities.enums.UserRole;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -17,7 +16,6 @@ public class UserDto {
         private UUID id;
         private String email;
         private String fullName;
-        private String password;
         private String phoneNo;
         private UserRole role;
         private boolean email_verified;

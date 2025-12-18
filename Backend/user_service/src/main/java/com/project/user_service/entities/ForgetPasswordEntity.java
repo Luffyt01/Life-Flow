@@ -1,7 +1,10 @@
 package com.project.user_service.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,7 +15,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @Builder
-@Table(name= "forgetTable")
+@Table(name = "forget_password_table")
 public class ForgetPasswordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
