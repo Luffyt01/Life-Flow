@@ -1,4 +1,4 @@
-package com.project.user_service.service.imp;
+package com.project.user_service.service.impl;
 
 import com.project.user_service.entities.SessionEntity;
 import com.project.user_service.entities.UserEntity;
@@ -20,6 +20,7 @@ public class SessionService {
 
     private final SessionRepository sessionRepository;
     private final int SESSION_LIMIT = 2;
+
 
     public void generateNewSession(UserEntity user, String refreshToken) {
         log.debug("Generating new session for user: {}", user.getId());

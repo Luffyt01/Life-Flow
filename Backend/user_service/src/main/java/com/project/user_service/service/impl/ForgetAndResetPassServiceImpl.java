@@ -1,4 +1,4 @@
-package com.project.user_service.service.imp;
+package com.project.user_service.service.impl;
 
 import com.project.user_service.dto.ResetPasswordDto;
 import com.project.user_service.entities.UserEntity;
@@ -8,6 +8,7 @@ import com.project.user_service.repositories.ForgetPasswordRepository;
 import com.project.user_service.repositories.UserRepository;
 import com.project.user_service.service.ForgetAndResetPassService;
 import com.project.user_service.service.PasswordResetTokenService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -19,12 +20,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ForgetAndResetPassServiceImp implements ForgetAndResetPassService {
+public class ForgetAndResetPassServiceImpl implements ForgetAndResetPassService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ForgetPasswordRepository forgetPasswordRepository;
-    private final EmailSendServiceImp emailSendServiceImp;
+    private final EmailSendServiceImpl emailSendServiceImp;
     private final PasswordResetTokenService passwordResetTokenService;
 
     @Override
@@ -53,6 +54,7 @@ public class ForgetAndResetPassServiceImp implements ForgetAndResetPassService {
     }
 
     @Override
+    @Transactional
     public void resetPasswordRequest(String token, ResetPasswordDto resetPasswordDto) {
         String email = resetPasswordDto.getEmail();
         log.info("Processing password reset request for email: {}", email);

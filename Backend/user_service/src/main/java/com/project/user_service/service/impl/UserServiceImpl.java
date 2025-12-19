@@ -1,4 +1,4 @@
-package com.project.user_service.service.imp;
+package com.project.user_service.service.impl;
 
 import com.project.user_service.dto.SignupDto;
 import com.project.user_service.dto.UserDto;
@@ -35,13 +35,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImp implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final EmailSendServiceImp emailSendServiceImp;
+    private final EmailSendServiceImpl emailSendServiceImp;
     private final JwtService jwtService;
 
 
@@ -190,6 +190,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
 
 
     @Override
+    @Transactional
     public void passwordUpdateAfterGoogleLogin(passwordUpdateAfterGoogleLoginDto userInput) {
         UserEntity user = getUserByEmail(userInput.getEmail());
         List<AuthProviderType> providers = user.getProvider() != null ?

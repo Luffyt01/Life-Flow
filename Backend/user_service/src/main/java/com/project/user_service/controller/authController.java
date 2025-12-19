@@ -1,9 +1,9 @@
 package com.project.user_service.controller;
 
 import com.project.user_service.dto.*;
-import com.project.user_service.service.AuthService;
 import com.project.user_service.service.ForgetAndResetPassService;
-import com.project.user_service.service.UserService;
+import com.project.user_service.service.impl.AuthServiceImpl;
+import com.project.user_service.service.impl.UserServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,8 +41,8 @@ public class authController {
     private String backendUrl;
 
     // Service dependencies
-    private final UserService userService;
-    private final AuthService authService;
+    private final UserServiceImpl userService;
+    private final AuthServiceImpl authService;
     private final AuthenticationManager authenticationManager;
     private final ForgetAndResetPassService forgetAndResetPassService;
 

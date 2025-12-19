@@ -3,9 +3,8 @@ package com.project.user_service.handler;
 
 import com.project.user_service.entities.UserEntity;
 import com.project.user_service.security.JwtService;
-import com.project.user_service.service.AuthService;
 import com.project.user_service.service.UserService;
-import com.project.user_service.service.imp.Oauth2ServiceImp;
+import com.project.user_service.service.impl.Oauth2ServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -30,7 +28,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final  UserService userService;
     private final JwtService jwtService;
-    private final Oauth2ServiceImp oauthServiceImp;
+    private final Oauth2ServiceImpl oauthServiceImp;
 
     @Value("${deploy.env}")
     private String deployEnv;

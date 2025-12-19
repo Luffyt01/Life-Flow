@@ -1,4 +1,4 @@
-package com.project.user_service.service.imp;
+package com.project.user_service.service.impl;
 
 import com.project.user_service.entities.UserEntity;
 import com.project.user_service.entities.enums.AuthProviderType;
@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class Oauth2ServiceImp {
+public class Oauth2ServiceImpl {
     private final AuthUtil authUtil;
     private final UserRepository userRepository;
     private final UserService userService;
@@ -39,6 +39,7 @@ public class Oauth2ServiceImp {
      * @return The processed UserEntity
      * @throws ResourceNotFoundException if required user attributes are missing
      */
+    @Transactional
     public UserEntity handleOAuth2LoginRequest(OAuth2User oAuth2User, String registrationId) {
         log.info("Processing OAuth2 login request for provider: {}", registrationId);
         

@@ -1,4 +1,4 @@
-package com.project.user_service.service.imp;
+package com.project.user_service.service.impl;
 
 import com.project.user_service.dto.LogInDto;
 import com.project.user_service.entities.UserEntity;
@@ -26,8 +26,8 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AuthServiceImp implements AuthService {
-    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImp.class);
+public class AuthServiceImpl implements AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
     
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;

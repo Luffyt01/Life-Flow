@@ -1,10 +1,11 @@
-package com.project.user_service.service.imp;
+package com.project.user_service.service.impl;
 
 import com.project.user_service.entities.ForgetPasswordEntity;
 import com.project.user_service.exception.ExceptionType.TokenExpireException;
 import com.project.user_service.exception.ExceptionType.UserOperationException;
 import com.project.user_service.repositories.ForgetPasswordRepository;
 import com.project.user_service.service.PasswordResetTokenService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,10 +15,11 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PasswordResetTokenServiceImp implements PasswordResetTokenService {
+public class PasswordResetTokenServiceImpl implements PasswordResetTokenService {
     private final ForgetPasswordRepository forgetPasswordRepository;
 
     @Override
+    @Transactional
     public void createPasswordResetToken(String email, String token) {
         log.info("Creating password reset token for email: {}", email);
         
@@ -59,6 +61,7 @@ public class PasswordResetTokenServiceImp implements PasswordResetTokenService {
     }
 
     @Override
+    @Transactional
     public boolean validatePasswordResetToken(String token, String email) {
         log.debug("Validating password reset token for email: {}", email);
         
@@ -91,6 +94,7 @@ public class PasswordResetTokenServiceImp implements PasswordResetTokenService {
         }
     }
 
+    @Transactional
     public void deleteForgetPasswordEntity(String email) {
         log.info("Deleting password reset token for email: {}", email);
         try {
