@@ -58,7 +58,7 @@ public class DonorProfile {
     @Column(length = 500)
     private String allergies;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String medications;
 
     private LocalDate tattooDate;
