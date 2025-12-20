@@ -28,7 +28,7 @@ springdoc:
     driver-class-name: org.postgresql.Driver
 
   jpa:
-    defer-defer-datasource-initialization: true
+    defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
@@ -39,10 +39,10 @@ springdoc:
         format_sql: true
 
   mail:
+    host: ${EMAIL_HOST:smtp.gmail.com}
+    port: ${EMAIL_PORT:587}
     username: ${EMAIL_USERNAME}
     password: ${EMAIL_PASSWORD}
-    host: ${EMAIL_HOST}
-    port: ${EMAIL_PORT}
     properties:
       mail:
         smtp:
@@ -50,9 +50,16 @@ springdoc:
           starttls:
             enable: true
             required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+          connectiontimeout: 10000      # Increased for production
+          timeout: 10000
+          writetimeout: 10000
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+          socketFactoryPort: 587
+          ssl:
+            trust: "*"
+
+
 
 jwt:
   secretKey: ${JWT_SECRET_KEY}

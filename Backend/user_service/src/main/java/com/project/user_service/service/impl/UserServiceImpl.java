@@ -81,7 +81,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                         now.plusMinutes(15),
                         now ,// update timestamp
                         passwordEncoder.encode(signupDto.getPassword()),
-                        signupDto.getPhoneNo()
+                        signupDto.getPhoneNo(),
+                        signupDto.getFullName()
 
                 );
                 // 2nd option

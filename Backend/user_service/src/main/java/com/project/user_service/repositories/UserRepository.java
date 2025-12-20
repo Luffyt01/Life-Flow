@@ -31,7 +31,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             "u.verifyTokenExpireAt = :expireAt, " +
             "u.updateAt = :updateAt, " +
             "u.password = :password, " +
-            "u.phoneNo = :phoneNo " +
+            "u.phoneNo = :phoneNo, " +
+            "u.fullName = :fullName " +
             "WHERE u.id = :id")
     void updateVerificationToken(
             @Param("id") UUID id,
@@ -39,7 +40,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             @Param("expireAt") LocalDateTime expireAt,
             @Param("updateAt") LocalDateTime updateAt,
             @Param("password") String password,
-            @Param("phoneNo") String phoneNo
+            @Param("phoneNo") String phoneNo,
+            @Param("fullName") String fullName
     );
 
     @Modifying
