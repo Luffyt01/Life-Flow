@@ -33,9 +33,9 @@ build/
 .vscode/
 
 # Application configuration
-application.yml
+#application.yml
 application.properties
-src/main/resources/application*.{yml,properties}
+src/main/resources/application*.{properties}
 
 # Environment specific files
 *.env
