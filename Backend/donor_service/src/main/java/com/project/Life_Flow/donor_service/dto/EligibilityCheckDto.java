@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class EligibilityCheckDto {
     private UUID checkId;
-    private UUID donor;
+    private UUID donorId;
     private LocalDateTime checkTimestamp;
     private Integer lastDonationDays;
     private BigDecimal minWeightKg;
