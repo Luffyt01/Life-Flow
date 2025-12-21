@@ -7,9 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.CurrentTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -51,10 +49,14 @@ public class InventoryTransactionsEntity {
     private String toLocation;
 
     @Column(name = "request_id")
-    private UUID request_id;
+    private UUID requestId;
 
     @Column(length = 255,name = "perform_by")
     private String performBy;
+
+    @CreationTimestamp
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime transactionDate;
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false)

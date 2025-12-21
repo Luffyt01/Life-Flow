@@ -39,8 +39,8 @@ public class ExpiryManagementEntity {
     @Column(name = "alert_level")
     private AlertLevel alertLevel = AlertLevel.WARNING;
 
-    @Column(name = "alert_sent_at")
-    private LocalDateTime alertSentAt;
+//    @Column(name = "alert_sent_at")
+//    private LocalDateTime alertSentAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resolution_action")
@@ -57,25 +57,5 @@ public class ExpiryManagementEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Business logic methods
-    public boolean isResolved() {
-        return resolutionAction != null && resolvedAt != null;
-    }
 
-    public void resolve(ResolutionAction action) {
-        this.resolutionAction = action;
-        this.resolvedAt = LocalDateTime.now();
-    }
-
-    public boolean isAlertSent() {
-        return alertSentAt != null;
-    }
-
-    public void markAlertAsSent() {
-        this.alertSentAt = LocalDateTime.now();
-    }
-
-    public boolean needsAlert() {
-        return !isResolved() && !isAlertSent();
-    }
 }

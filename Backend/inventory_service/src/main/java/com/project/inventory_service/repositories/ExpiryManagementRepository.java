@@ -16,26 +16,5 @@ import java.util.UUID;
 @Repository
 public interface ExpiryManagementRepository extends JpaRepository<ExpiryManagementEntity, String> {
 
-    List<ExpiryManagementEntity> findByBloodInventory(BloodInventoryEntity bloodInventory);
 
-    List<ExpiryManagementEntity> findByAlertLevel(AlertLevel alertLevel);
-    
-    List<ExpiryManagementEntity> findByResolutionActionIsNull();
-    
-    List<ExpiryManagementEntity> findByResolutionAction(ResolutionAction action);
-    
-    @Query("SELECT e FROM ExpiryManagementEntity e WHERE e.alertSentAt IS NULL AND e.resolutionAction IS NULL")
-    List<ExpiryManagementEntity> findPendingAlerts();
-    
-    @Query("SELECT e FROM ExpiryManagementEntity e WHERE e.bloodInventory.bagId = :bagId ORDER BY e.createdAt DESC")
-    List<ExpiryManagementEntity> findByBagId(@Param("bagId") UUID bagId);
-    
-    @Query("SELECT e FROM ExpiryManagementEntity e WHERE e.daysUntilExpiry <= :daysThreshold AND e.resolutionAction IS NULL")
-    List<ExpiryManagementEntity> findExpiringSoon(@Param("daysThreshold") int daysThreshold);
-    
-    @Query("SELECT e.alertLevel, COUNT(e) FROM ExpiryManagementEntity e WHERE e.resolutionAction IS NULL GROUP BY e.alertLevel")
-    List<Object[]> countAlertsByLevel();
-    
-    @Query("SELECT e FROM ExpiryManagementEntity e WHERE e.alertSentAt < :cutoffDate AND e.resolutionAction IS NULL")
-    List<ExpiryManagementEntity> findUnresolvedOlderThan(@Param("cutoffDate") LocalDateTime cutoffDate);
 }

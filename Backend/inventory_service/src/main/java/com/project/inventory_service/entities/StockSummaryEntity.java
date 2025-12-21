@@ -58,31 +58,4 @@ public class StockSummaryEntity {
     @Column(nullable = false)
     private LocalDateTime lastUpdated;
 
-    // Business logic methods
-    public int getTotalUnits() {
-        return availableUnits + reservedUnits;
-    }
-
-    public boolean isStockLow() {
-        return availableUnits <= criticalThreshold;
-    }
-
-    public boolean needsReordering() {
-        return availableUnits <= recorderThreshold;
-    }
-
-    public void updateAvailableUnits(int delta) {
-        this.availableUnits = Math.max(0, this.availableUnits + delta);
-        updateAlertStatus();
-    }
-
-    public void updateReservedUnits(int delta) {
-        this.reservedUnits = Math.max(0, this.reservedUnits + delta);
-        updateAlertStatus();
-    }
-
-    private void updateAlertStatus() {
-        this.alertTrigger = isStockLow() || needsReordering();
-    }
-
 }
