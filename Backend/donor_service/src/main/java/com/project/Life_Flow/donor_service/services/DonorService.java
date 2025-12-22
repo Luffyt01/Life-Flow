@@ -11,11 +11,11 @@ import java.util.UUID;
 
 public interface DonorService {
 
-    DonorProfileDto getMyProfile(UUID userId);
+    DonorProfileResponse getMyProfile(UUID userId);
 
     DonorProfileResponse registerDonor(DonorProfileRequestDto request, UUID userId);
 
-    DonorProfileDto getDonorProfile(UUID donorId);
+    DonorProfileResponse getDonorProfile(UUID donorId);
 
     EligibilityCheckResponse checkEligibility(UUID donorId);
 
