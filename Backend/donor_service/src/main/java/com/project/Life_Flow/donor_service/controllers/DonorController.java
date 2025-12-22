@@ -23,7 +23,7 @@ public class DonorController {
     private final JwtParser jwtParser;
 
     @GetMapping("/profile/me")
-    public ResponseEntity<DonorProfileDto> getMyProfile(HttpServletRequest request){
+    public ResponseEntity<DonorProfileResponse> getMyProfile(HttpServletRequest request){
         return ResponseEntity.ok(donorService.getMyProfile(jwtParser.getUserId(request)));
     }
 
@@ -37,14 +37,14 @@ public class DonorController {
     }
 
     @GetMapping("/{donorId}")
-    public ResponseEntity<DonorProfileDto> getDonorById(@PathVariable UUID donorId) {
+    public ResponseEntity<DonorProfileResponse> getDonorById(@PathVariable UUID donorId) {
         return ResponseEntity.ok(donorService.getDonorProfile(donorId));
     }
 
     @GetMapping("/me/eligibility")
     public ResponseEntity<EligibilityCheckResponse> checkMyEligibility(HttpServletRequest request) {
         // First get profile ID from User ID
-        DonorProfileDto profile = donorService.getMyProfile(jwtParser.getUserId(request));
+        DonorProfileResponse profile = donorService.getMyProfile(jwtParser.getUserId(request));
         return ResponseEntity.ok(donorService.checkEligibility(profile.getDonorId()));
     }
 

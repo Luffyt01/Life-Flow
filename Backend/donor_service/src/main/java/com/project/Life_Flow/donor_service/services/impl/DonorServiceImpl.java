@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.UUID;
 
 @Service
@@ -35,12 +37,10 @@ public class DonorServiceImpl implements DonorService {
 
     @Override
     @Transactional(readOnly = true)
-    public DonorProfileDto getMyProfile(UUID userId) {
-
-        return modelMapper.map(
-                donorProfileRepository.findByUserId(userId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Donor profile not found"))
-                ,DonorProfileDto.class);
+    public DonorProfileResponse getMyProfile(UUID userId) {
+        DonorProfile donor = donorProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Donor profile not found for user"));
+        return getDonorProfile(donor.getDonorId());
     }
 
     @Override
@@ -52,11 +52,13 @@ public class DonorServiceImpl implements DonorService {
 
         BigDecimal heightM = BigDecimal.valueOf(donorProfileRequestDto.getHeightCm()/100);
         BigDecimal bmi = donorProfileRequestDto.getWeightKg().divide(heightM.pow(2), 2, java.math.RoundingMode.HALF_UP);
+
         DonorProfile donorProfile = modelMapper.map(donorProfileRequestDto, DonorProfile.class);
         donorProfile.setUserId(userId);
         donorProfile.setBmi(bmi);
         DonorProfile savedDonorProfile = donorProfileRepository.save(donorProfile);
 
+        // Initialize gamification profile
         DonorGamification gamification = DonorGamification.builder()
                         .donor(savedDonorProfile)
                         .totalPoints(0)
@@ -69,34 +71,49 @@ public class DonorServiceImpl implements DonorService {
         log.info("BUSINESS_EVENT: New Donor Profile created. DonorID: {}, UserID: {}",
                 savedDonorProfile.getDonorId(), userId);
 
-        return DonorProfileResponse.builder()
-                .donorId(savedDonorProfile.getDonorId())
-                .userId(userId)
-                .bloodType(savedDonorProfile.getBloodType())
-                .ageYears(0)
-                .weightKg(savedDonorProfile.getWeightKg())
-                .heightCm(savedDonorProfile.getHeightCm())
-                .bmi(savedDonorProfile.getBmi())
-                .eligibilityStatus(savedDonorProfile.getEligibilityStatus())
-                .verificationStatus(savedDonorProfile.getVerificationStatus())
-                .lastEligibilityCheck(savedDonorProfile.getLastEligibilityCheck())
-                .badgeLevel(savedRecord.getBadgeLevel())
-                .totalPoints(savedRecord.getTotalPoints())
-                .build();
+        return mapToProfileResponse(savedDonorProfile, savedRecord);
     }
 
     @Override
-    public DonorProfileDto getDonorProfile(UUID donorId) {
-        return null;
+    public DonorProfileResponse getDonorProfile(UUID donorId) {
+        DonorProfile donor = getDonorEntity(donorId);
+        DonorGamification gamification = gamificationRepository.findByDonor(donor)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Gamification profile not found for donor with id: "+donor.getDonorId()
+                ));
+        return mapToProfileResponse(donor, gamification);
     }
 
     @Override
     public EligibilityCheckResponse checkEligibility(UUID donorId) {
+//        DonorProfile donor = getDonorEntity(donorId);
+//        boolean isEligible = true;
+//        String reason = "";
+//
+//        // Eligibility Check conditions
+//        // 1. Age check (18-65 standard)
+//        int age = Period.between(donor.getDateOfBirth(), )
         return null;
     }
 
     @Override
     public DonorProfile getDonorEntity(UUID donorId) {
-        return null;
+        return donorProfileRepository.findById(donorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Donor not found with id: "+donorId));
+    }
+
+    private DonorProfileResponse mapToProfileResponse(DonorProfile donor, DonorGamification game) {
+        return DonorProfileResponse.builder()
+                .donorId(donor.getDonorId())
+                .userId(donor.getUserId())
+                .bloodType(donor.getBloodType())
+                .ageYears(Period.between(donor.getDateOfBirth(), LocalDate.now()).getYears())
+                .weightKg(donor.getWeightKg())
+                .bmi(donor.getBmi())
+                .eligibilityStatus(donor.getEligibilityStatus())
+                .verificationStatus(donor.getVerificationStatus())
+                .badgeLevel(game.getBadgeLevel())
+                .totalPoints(game.getTotalPoints())
+                .build();
     }
 }
