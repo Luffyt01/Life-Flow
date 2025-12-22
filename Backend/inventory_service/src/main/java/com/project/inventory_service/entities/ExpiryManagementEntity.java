@@ -14,7 +14,8 @@ import java.util.UUID;
 @Table(name = "expiry_management",
         indexes = {
                 @Index(name = "idx_bag_id", columnList = "bagId"),
-                @Index(name = "idx_alert_level", columnList = "alertLevel")
+                @Index(name = "idx_alert_level", columnList = "alertLevel"),
+                @Index(name = "hospital_id_idx", columnList = "hospitalId")
         })
 @Data
 @Builder
@@ -33,6 +34,7 @@ public class ExpiryManagementEntity {
     private BloodInventoryEntity bloodInventory;
 
     private long daysUntilExpiry;
+
 
     @Enumerated(EnumType.STRING)
     private AlertLevel alertLevel = AlertLevel.NORMAL;

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +29,8 @@ public interface InventoryTransactionsRepository extends JpaRepository<Inventory
      * @param transactionType The type of transaction
      * @return List of transactions of the specified type
      */
-    List<InventoryTransactionsEntity> findByTransactionType(TransactionType transactionType);
+    @Query("SELECT t FROM InventoryTransactionsEntity t WHERE t.transactionType = :transactionType AND t.hospitalId = :hospitalId")
+    List<InventoryTransactionsEntity> findByTransactionTypeAndHospitalId(UUID hospitalId,TransactionType transactionType);
 
     /**
      * Find all transactions for a specific request
@@ -59,4 +61,7 @@ public interface InventoryTransactionsRepository extends JpaRepository<Inventory
      * @return true if a transaction exists, false otherwise
      */
     boolean existsByRequestIdAndBagId(UUID requestId, UUID bagId);
+
+    @Query("SELECT t FROM InventoryTransactionsEntity t WHERE t.hospitalId = :hospitalId")
+    List<InventoryTransactionsEntity> findAllByHospitalId(UUID hospitalId);
 }

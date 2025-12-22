@@ -26,6 +26,7 @@ import java.util.UUID;
                @Index(name = "status_idx", columnList = "status"),
                @Index(name = "donor_id_idx", columnList = "donorId"),
                @Index(name = "expairy_date_idx", columnList = "expiryDate"),
+               @Index(name = "hospital_id_idx", columnList = "hospitalId"),
        }
 
 )
@@ -61,7 +62,7 @@ public class BloodInventoryEntity {
     private LocalDate reservedAt;
 
 
-    private UUID reserveByHospitalID;
+    private UUID hospitalId;
 
 
     private UUID donorId;

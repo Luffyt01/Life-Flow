@@ -15,4 +15,28 @@ import java.util.UUID;
 @Repository
 public interface StockSummaryRepository extends JpaRepository<StockSummaryEntity, UUID> {
 
+    Optional<StockSummaryEntity> findByBloodTypeAndHospitalId(BloodType bloodType, UUID hospitalId);
+
+    List<StockSummaryEntity> findByHospitalId(UUID hospitalId);
+
+    List<StockSummaryEntity> findByBloodType(BloodType bloodType);
+
+    List<StockSummaryEntity> findByNeedsReorder(boolean needsReorder);
+
+    @Modifying
+    @Query("UPDATE StockSummaryEntity s SET " +
+            "s.availableUnits = s.availableUnits + :availableChange, " +
+            "s.reservedUnits = s.reservedUnits + :reservedChange, " +
+            "s.expiredUnits = s.expiredUnits + :expiredChange, " +
+            "s.needsReorder = (s.availableUnits + :availableChange) <= s.reorderThreshold " +
+            "WHERE s.stockId = :stockId ")
+    int updateStockLevels(
+            @Param("stockId") UUID stockId,
+            @Param("availableChange") int availableChange,
+            @Param("reservedChange") int reservedChange,
+            @Param("expiredChange") int expiredChange
+    );
+
+
+    boolean existsByBloodTypeAndHospitalId(BloodType bloodType, UUID hospitalId);
 }

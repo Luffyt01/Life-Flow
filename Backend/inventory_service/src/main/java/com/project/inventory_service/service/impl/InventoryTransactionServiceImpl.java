@@ -47,6 +47,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                     .fromLocation(requestDto.getFromLocation())
                     .toLocation(requestDto.getToLocation())
                     .notes(requestDto.getNotes())
+                    .hospitalId(requestDto.getHospitalId())
                     .requestId(requestDto.getRequestId())
                     .build();
 
@@ -76,15 +77,15 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     }
 
     @Override
-    public List<TransactionResponseDto> getTransactionsByType(TransactionType transactionType) {
+    public List<TransactionResponseDto> getTransactionsByType(UUID hospitalId,TransactionType transactionType) {
         try {
 //            TransactionType type = TransactionType.valueOf(transactionType.toUpperCase());
             if(transactionType == null){
-                return transactionsRepository.findAll().stream()
+                return transactionsRepository.findAllByHospitalId(hospitalId).stream()
                         .map(transaction -> modelMapper.map(transaction, TransactionResponseDto.class))
                         .collect(Collectors.toList());
             }
-            List<InventoryTransactionsEntity> transactions = transactionsRepository.findByTransactionType(transactionType);
+            List<InventoryTransactionsEntity> transactions = transactionsRepository.findByTransactionType(hospitalId,transactionType);
             return Collections.singletonList(modelMapper.map(transactions, TransactionResponseDto.class));
         } catch (IllegalArgumentException e) {
             throw new RuntimeConflictException("Invalid transaction type: " + transactionType);

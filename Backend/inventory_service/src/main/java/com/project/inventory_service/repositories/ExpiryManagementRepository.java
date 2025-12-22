@@ -9,12 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface ExpiryManagementRepository extends JpaRepository<ExpiryManagementEntity, String> {
 
- @Query("SELECT  e from  ExpiryManagementEntity e where e.alertLevel= :alertLevel")
- List<ExpiryManagementEntity> findByAlertLevel(AlertLevel alertLevel);
+ @Query("SELECT  e from  ExpiryManagementEntity e where e.bloodInventory.hospitalId= :hospitalId and e.alertLevel= :alertLevel")
+ List<ExpiryManagementEntity> findByAlertLevel(UUID hospitalId, AlertLevel alertLevel);
 
  @Modifying
  @Query(value = """
@@ -32,4 +33,8 @@ public interface ExpiryManagementRepository extends JpaRepository<ExpiryManageme
     """, nativeQuery = true)
  @Transactional
  int updateExpiryStatus();
+
+
+ @Query("SELECT e FROM ExpiryManagementEntity e WHERE e.bloodInventory.hospitalId = :hospitalId")
+ List<ExpiryManagementEntity> findAllByHospitalId(UUID hospitalId);
 }

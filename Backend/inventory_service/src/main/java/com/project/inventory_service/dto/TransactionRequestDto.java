@@ -12,7 +12,10 @@ import java.util.UUID;
 public class TransactionRequestDto {
     @NotNull(message = "Bag ID is required")
     private UUID bagId;
-    
+
+
+    private UUID hospitalId;
+
     @NotNull(message = "Transaction type is required")
     private TransactionType transactionType;
     

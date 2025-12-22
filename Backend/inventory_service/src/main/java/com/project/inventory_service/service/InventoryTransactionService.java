@@ -11,6 +11,6 @@ public interface InventoryTransactionService {
     TransactionResponseDto createTransaction(TransactionRequestDto requestDto);
     TransactionResponseDto getTransactionById(UUID transactionId);
     List<TransactionResponseDto> getTransactionsByBagId(UUID bagId);
-    List<TransactionResponseDto> getTransactionsByType(TransactionType transactionType);
+    List<TransactionResponseDto> getTransactionsByType(UUID hospitalId,TransactionType transactionType);
     List<TransactionResponseDto> getTransactionsByRequestId(UUID requestId);
 }

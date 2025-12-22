@@ -4,6 +4,8 @@ import com.project.inventory_service.dto.TransactionRequestDto;
 import com.project.inventory_service.dto.TransactionResponseDto;
 import com.project.inventory_service.entities.enums.TransactionType;
 import com.project.inventory_service.service.InventoryTransactionService;
+import com.project.inventory_service.utils.JwtParser;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,10 +21,15 @@ import java.util.UUID;
 public class InventoryTransactionController {
 
     private final InventoryTransactionService transactionService;
+    private final JwtParser jwtParser;
 
     @PostMapping
     public ResponseEntity<TransactionResponseDto> createTransaction(
+            HttpServletRequest request,
             @Valid @RequestBody TransactionRequestDto requestDto) {
+        UUID hospitalId = jwtParser.getUserId(request);
+        requestDto.setHospitalId(hospitalId);
+
         TransactionResponseDto response = transactionService.createTransaction(requestDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -43,9 +50,11 @@ public class InventoryTransactionController {
 
     @GetMapping
     public ResponseEntity<List<TransactionResponseDto>> getTransactionsByType(
+            HttpServletRequest request,
             @RequestParam(required = false) TransactionType type) {
+        UUID hospitalId = jwtParser.getUserId(request);
 
-            return ResponseEntity.ok(transactionService.getTransactionsByType(type));
+        return ResponseEntity.ok(transactionService.getTransactionsByType(hospitalId, type));
     }
 
     @GetMapping("/request/{requestId}")

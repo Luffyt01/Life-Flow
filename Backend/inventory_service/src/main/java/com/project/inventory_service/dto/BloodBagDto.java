@@ -48,6 +48,8 @@ public class BloodBagDto {
     @NotEmpty(message = "Donor ID is required")
     private UUID donorId;
 
+    private UUID hospitalId;
+
     @NotNull(message = "Blood component type is required")
     @NotEmpty(message = "Blood component type is required")
     private BloodComponentType bloodComponentType;

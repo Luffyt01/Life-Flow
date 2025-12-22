@@ -4,6 +4,8 @@ import com.project.inventory_service.dto.*;
 import com.project.inventory_service.entities.enums.BloodType;
 import com.project.inventory_service.entities.enums.StatusType;
 import com.project.inventory_service.service.impl.InventoryServiceImpl;
+import com.project.inventory_service.utils.JwtParser;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,11 @@ import java.util.UUID;
 public class BloodInventoryController {
 
     private final InventoryServiceImpl inventoryService;
-
+    private final JwtParser jwtParser;
     @PostMapping()
-    public ResponseEntity<BloodBagDto> createBloodInventory(@RequestBody BloodBagDto bloodBagDto){
-
+    public ResponseEntity<BloodBagDto> createBloodInventory(HttpServletRequest req, @RequestBody BloodBagDto bloodBagDto) {
+        UUID userId = jwtParser.getUserId(req);
+        bloodBagDto.setHospitalId(userId);
         BloodBagDto bloodBagDto1 = inventoryService.createBloodInventory(bloodBagDto);
         return new ResponseEntity<>(bloodBagDto1, HttpStatus.CREATED);
     }

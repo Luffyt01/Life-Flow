@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -36,11 +37,11 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
      * @return List of expiry management records matching the alert level
      * @throws RuntimeConflictException if there's an error retrieving the data
      */
-    public List<ExpiryManagementTableResponseDto> getDataByAlertLevel(AlertLevel alertLevel) {
+    public List<ExpiryManagementTableResponseDto> getDataByAlertLevel(UUID userId, AlertLevel alertLevel) {
         log.info("Fetching expiry management data for alert level: {}", alertLevel);
 
         try {
-            List<ExpiryManagementEntity> getData = expiryManagementRepository.findByAlertLevel(alertLevel);
+            List<ExpiryManagementEntity> getData = expiryManagementRepository.findByAlertLevel(userId,alertLevel);
             log.debug("Found {} records with alert level: {}", getData.size(), getData);
             log.info(getData.toString());
             if (getData == null || getData.isEmpty()) {
@@ -86,6 +87,29 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
         } catch (Exception e) {
             log.error("Error updating expiry status: {}", e.getMessage(), e);
             throw new RuntimeConflictException("Failed to update expiry status: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ExpiryManagementTableResponseDto> getAllExpiryData(UUID hospitalId) {
+        try{
+            List<ExpiryManagementEntity> getData = expiryManagementRepository.findAllByHospitalId(hospitalId);
+            return getData.stream()
+                    .filter(Objects::nonNull)  // Filter out any null entries
+                    .map(data -> {
+                        try {
+                            return modelMapper.map(data, ExpiryManagementTableResponseDto.class);
+                        } catch (Exception e) {
+                            log.error("Error mapping entity to DTO: {}", e.getMessage());
+                            return null;  // or handle the error as needed
+                        }
+                    })
+                    .filter(Objects::nonNull)  // Filter out any null DTOs from failed mappings
+                    .collect(Collectors.toList());
+        }catch (Exception e){
+            log.error("Error retrieving expiry management data for alert level : {}",
+                    e.getMessage(), e);
+            throw new RuntimeConflictException("Error retrieving expiry management data: " + e.getMessage());
         }
     }
 }

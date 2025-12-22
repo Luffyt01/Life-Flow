@@ -21,7 +21,8 @@ import java.util.UUID;
         @Index(name="bag_id_idx",columnList = "bagId"),
         @Index(name="transaction_type_idx",columnList = "transactionType"),
         @Index(name="transaction_date_idx",columnList = "transactionDate"),
-        @Index(name="request_id_idx",columnList = "requestId")
+        @Index(name="request_id_idx",columnList = "requestId"),
+           @Index(name = "hospital_id_idx",columnList = "hospitalId")
    }
 )
 public class InventoryTransactionsEntity {
@@ -30,8 +31,9 @@ public class InventoryTransactionsEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID transactionId;
 
-
     private UUID bagId;
+
+    private UUID hospitalId;
 
     @Enumerated(EnumType.STRING)
     @Column( nullable = false)
