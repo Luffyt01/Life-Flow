@@ -1,0 +1,91 @@
+package com.project.inventory_service.service.impl;
+
+import com.project.inventory_service.dto.ExpiryManagementTableResponseDto;
+import com.project.inventory_service.entities.ExpiryManagementEntity;
+import com.project.inventory_service.entities.enums.AlertLevel;
+import com.project.inventory_service.exceptions.ExceptionTypes.RuntimeConflictException;
+import com.project.inventory_service.repositories.ExpiryManagementRepository;
+import com.project.inventory_service.service.ExpiryManagementService;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+/**
+ * Service implementation for managing expiry-related operations of blood inventory.
+ * Handles alert level management and expiry status updates.
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ExpiryManagementServiceImpl implements ExpiryManagementService {
+
+    private final ExpiryManagementRepository expiryManagementRepository;
+    private final ModelMapper modelMapper;
+
+    /**
+     * Retrieves expiry management data filtered by alert level.
+     *
+     * @param alertLevel The alert level to filter by (NORMAL, WARNING, CRITICAL, EXPIRED)
+     * @return List of expiry management records matching the alert level
+     * @throws RuntimeConflictException if there's an error retrieving the data
+     */
+    public List<ExpiryManagementTableResponseDto> getDataByAlertLevel(AlertLevel alertLevel) {
+        log.info("Fetching expiry management data for alert level: {}", alertLevel);
+
+        try {
+            List<ExpiryManagementEntity> getData = expiryManagementRepository.findByAlertLevel(alertLevel);
+            log.debug("Found {} records with alert level: {}", getData.size(), getData);
+            log.info(getData.toString());
+            if (getData == null || getData.isEmpty()) {
+                log.info("No records found for alert level: {}", alertLevel);
+                return Collections.emptyList();
+            }
+
+            log.debug("Found {} records with alert level: {}", getData.size(), alertLevel);
+
+            return getData.stream()
+                    .filter(Objects::nonNull)  // Filter out any null entries
+                    .map(data -> {
+                        try {
+                            return modelMapper.map(data, ExpiryManagementTableResponseDto.class);
+                        } catch (Exception e) {
+                            log.error("Error mapping entity to DTO: {}", e.getMessage());
+                            return null;  // or handle the error as needed
+                        }
+                    })
+                    .filter(Objects::nonNull)  // Filter out any null DTOs from failed mappings
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error retrieving expiry management data for alert level {}: {}",
+                    alertLevel, e.getMessage(), e);
+            throw new RuntimeConflictException("Error retrieving expiry management data: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Updates the expiry status of all blood inventory items.
+     * This method recalculates days until expiry and updates alert levels accordingly.
+     *
+     * @throws RuntimeConflictException if there's an error during the update
+     */
+    @Transactional
+    public void updateExpiryStatus() {
+        log.info("Starting expiry status update job");
+
+        try {
+            int updatedCount = expiryManagementRepository.updateExpiryStatus();
+            log.info("Successfully updated expiry status for {} blood bags", updatedCount);
+
+        } catch (Exception e) {
+            log.error("Error updating expiry status: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Failed to update expiry status: " + e.getMessage());
+        }
+    }
+}

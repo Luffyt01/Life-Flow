@@ -32,11 +32,13 @@ public class BloodBagDto {
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Date must be in yyyy-MM-dd format")
     private LocalDate donationDate;
 
-//    private LocalDate collectionDate;
+    @NotNull(message = "Collection date is required")
+    private LocalDate collectionDate;
+
     @NotNull(message = "Expiry date is required")
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Date must be in yyyy-MM-dd format")
     @Future(message = "Expiry date must be in the future")
-    private String expiryDate;
+    private LocalDate expiryDate;
 
     @NotNull(message = "Storage location is required")
     @NotEmpty(message = "Storage location is required")

@@ -36,19 +36,19 @@ public class BloodInventoryEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID bagId;
 
-    @Column(name ="blood_type",nullable = false)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
 
-    @Column(nullable = false,name = "batch_number")
     private String batchNumber;
 
     @CreationTimestamp
     private LocalDate donationDate;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate collectionDate;
-
+    @Column(nullable = false)
     private LocalDate expiryDate;
 
     private String storageLocation;
@@ -71,6 +71,7 @@ public class BloodInventoryEntity {
 
     private Double unitsAvailable;
 
+    @Enumerated(EnumType.STRING)
     private QualityCheckStatus qualityCheckStatus = QualityCheckStatus.PENDING;
 
     private LocalDate qualityCheckDate;

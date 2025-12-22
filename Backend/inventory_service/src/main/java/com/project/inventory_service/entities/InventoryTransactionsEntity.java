@@ -30,9 +30,8 @@ public class InventoryTransactionsEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID transactionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bag_id",nullable = false)
-    private BloodInventoryEntity bag;
+
+    private UUID bagId;
 
     @Enumerated(EnumType.STRING)
     @Column( nullable = false)
@@ -48,11 +47,13 @@ public class InventoryTransactionsEntity {
     @Column( nullable = false,length = 255)
     private String toLocation;
 
-    @Column(name = "request_id")
+
     private UUID requestId;
 
-    @Column(length = 255,name = "perform_by")
+    @Column(length = 255)
     private String performBy;
+
+    private String notes;
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false)

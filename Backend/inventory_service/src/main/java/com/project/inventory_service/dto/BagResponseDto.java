@@ -2,11 +2,9 @@ package com.project.inventory_service.dto;
 
 import com.project.inventory_service.entities.enums.BloodComponentType;
 import com.project.inventory_service.entities.enums.BloodType;
+import com.project.inventory_service.entities.enums.QualityCheckStatus;
 import com.project.inventory_service.entities.enums.StatusType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,7 +14,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetBagResponseDto {
+@Getter
+@Setter
+public class BagResponseDto {
 
     private UUID bagId;
     private BloodType bloodType;
@@ -27,6 +27,9 @@ public class GetBagResponseDto {
     private StatusType status;
     private BloodComponentType bloodComponentType;
     private Double unitsAvailable;
+    private QualityCheckStatus qualityCheckStatus;
+    private LocalDate qualityCheckDate;
+    private String qualityCheckNotes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

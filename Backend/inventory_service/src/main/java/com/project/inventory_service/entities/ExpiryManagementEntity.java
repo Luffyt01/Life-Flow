@@ -3,14 +3,12 @@ package com.project.inventory_service.entities;
 import com.project.inventory_service.entities.enums.AlertLevel;
 import com.project.inventory_service.entities.enums.ResolutionAction;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "expiry_management",
@@ -21,40 +19,38 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
 public class ExpiryManagementEntity {
 
     @Id
-    @Column(name = "expiry_alert_id", length = 50)
-    private String expiryAlertId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID expiryAlertId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bag_id", nullable = false, referencedColumnName = "bagId")
+//    @JoinColumn(name = "bag_id", nullable = false, referencedColumnName = "bagId")
     private BloodInventoryEntity bloodInventory;
 
-    @Column(name = "days_until_expiry")
-    private Integer daysUntilExpiry;
+    private long daysUntilExpiry;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "alert_level")
-    private AlertLevel alertLevel = AlertLevel.WARNING;
+    private AlertLevel alertLevel = AlertLevel.NORMAL;
 
 //    @Column(name = "alert_sent_at")
 //    private LocalDateTime alertSentAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "resolution_action")
     private ResolutionAction resolutionAction;
 
-    @Column(name = "resolved_at")
+
     private LocalDateTime resolvedAt;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false)
+    @Column( updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
 
