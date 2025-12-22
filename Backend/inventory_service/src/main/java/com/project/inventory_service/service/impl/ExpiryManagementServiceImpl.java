@@ -37,7 +37,7 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
      * @return List of expiry management records matching the alert level
      * @throws RuntimeConflictException if there's an error retrieving the data
      */
-    public List<ExpiryManagementTableResponseDto> getDataByAlertLevel(UUID userId, AlertLevel alertLevel) {
+    public List<ExpiryManagementTableResponseDto> getExpiryManagementDataByAlert(UUID userId, AlertLevel alertLevel) {
         log.info("Fetching expiry management data for alert level: {}", alertLevel);
 
         try {
@@ -77,7 +77,7 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
      * @throws RuntimeConflictException if there's an error during the update
      */
     @Transactional
-    public void updateExpiryStatus() {
+    public void UpdateEveryDayExpiryManagementTableJob() {
         log.info("Starting expiry status update job");
 
         try {
@@ -91,7 +91,7 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
     }
 
     @Override
-    public List<ExpiryManagementTableResponseDto> getAllExpiryData(UUID hospitalId) {
+    public List<ExpiryManagementTableResponseDto> getAllExpiryManagementTableData(UUID hospitalId) {
         try{
             List<ExpiryManagementEntity> getData = expiryManagementRepository.findAllByHospitalId(hospitalId);
             return getData.stream()

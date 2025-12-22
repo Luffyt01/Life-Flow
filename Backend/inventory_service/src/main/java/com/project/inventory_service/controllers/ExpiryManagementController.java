@@ -23,23 +23,23 @@ public class ExpiryManagementController {
     private final JwtParser jwtParser;
 
     @GetMapping("/expiry-alert")
-    public ResponseEntity<List<ExpiryManagementTableResponseDto>> getExpiryAlert(HttpServletRequest req, @RequestParam AlertLevel alertLevel) {
+    public ResponseEntity<List<ExpiryManagementTableResponseDto>> getExpiryManagementDataByAlert(HttpServletRequest req, @RequestParam AlertLevel alertLevel) {
         UUID userId = jwtParser.getUserId(req);
-        List<ExpiryManagementTableResponseDto> searchedData = expiryManagementServiceImp.getDataByAlertLevel(userId, alertLevel);
+        List<ExpiryManagementTableResponseDto> searchedData = expiryManagementServiceImp.getExpiryManagementDataByAlert(userId, alertLevel);
         return ResponseEntity.ok(searchedData);
     }
 
     @GetMapping("/UpdateTableJob")
-    public ResponseEntity<String> UpdateEveryDayTableJob() {
-        expiryManagementServiceImp.updateExpiryStatus();
+    public ResponseEntity<String> UpdateEveryDayExpiryManagementTableJob() {
+        expiryManagementServiceImp.UpdateEveryDayExpiryManagementTableJob();
 
         return ResponseEntity.ok("Expiry table updated");
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ExpiryManagementTableResponseDto>> getAllExpiryData(HttpServletRequest req) {
+    public ResponseEntity<List<ExpiryManagementTableResponseDto>> getAllExpiryManagementTableData(HttpServletRequest req) {
         UUID hospitalId = jwtParser.getUserId(req);
-        List<ExpiryManagementTableResponseDto> allData = expiryManagementServiceImp.getAllExpiryData(hospitalId);
+        List<ExpiryManagementTableResponseDto> allData = expiryManagementServiceImp.getAllExpiryManagementTableData(hospitalId);
         return ResponseEntity.ok(allData);
     }
 

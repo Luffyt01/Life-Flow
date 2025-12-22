@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ExpiryManagementService {
-    List<ExpiryManagementTableResponseDto> getDataByAlertLevel(AlertLevel alertLevel);
-    void updateExpiryStatus();
+    List<ExpiryManagementTableResponseDto> getExpiryManagementDataByAlert(UUID hospitalId,AlertLevel alertLevel);
+    void UpdateEveryDayExpiryManagementTableJob();
 
-    List<ExpiryManagementTableResponseDto> getAllExpiryData(UUID hospitalId);
+    List<ExpiryManagementTableResponseDto> getAllExpiryManagementTableData(UUID hospitalId);
 }
