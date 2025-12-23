@@ -1,9 +1,6 @@
 package com.project.Life_Flow.donor_service.entities;
 
-import com.project.Life_Flow.donor_service.entities.enums.BloodType;
-import com.project.Life_Flow.donor_service.entities.enums.EligibilityStatus;
-import com.project.Life_Flow.donor_service.entities.enums.Gender;
-import com.project.Life_Flow.donor_service.entities.enums.VerificationStatus;
+import com.project.Life_Flow.donor_service.entities.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -66,8 +63,8 @@ public class DonorProfile {
     @Column(length = 500)
     private String recentTravel;
 
-    @Column(length = 100)
-    private String vaccinationStatus;
+    @Enumerated(EnumType.STRING)
+    private VaccinationStatus vaccinationStatus;
 
     @Enumerated(EnumType.STRING)
     private EligibilityStatus eligibilityStatus = EligibilityStatus.PENDING_VERIFICATION;
