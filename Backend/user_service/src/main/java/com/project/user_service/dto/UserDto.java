@@ -1,0 +1,25 @@
+package com.project.user_service.dto;
+
+import com.project.user_service.entities.enums.UserRole;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+
+public class UserDto {
+        private Long id;
+        private String email;
+        private String password;
+        private Number phoneNo;
+        private Set<UserRole> roles;
+        private boolean email_verified;
+        private  boolean profile_complete;
+        private LocalDateTime createAt;
+}
