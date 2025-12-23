@@ -6,6 +6,7 @@ import com.project.Life_Flow.donor_service.dto.DonorProfileResponse;
 import com.project.Life_Flow.donor_service.dto.EligibilityCheckResponse;
 import com.project.Life_Flow.donor_service.entities.DonorGamification;
 import com.project.Life_Flow.donor_service.entities.DonorProfile;
+import com.project.Life_Flow.donor_service.entities.EligibilityCheck;
 import com.project.Life_Flow.donor_service.entities.enums.BadgeLevel;
 import com.project.Life_Flow.donor_service.exception.ResourceNotFoundException;
 import com.project.Life_Flow.donor_service.repositories.DonorGamificationRepository;
@@ -23,7 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import static com.project.Life_Flow.donor_service.utils.EligibilityUtil.*;
 
 @Service
 @RequiredArgsConstructor
@@ -86,14 +92,123 @@ public class DonorServiceImpl implements DonorService {
 
     @Override
     public EligibilityCheckResponse checkEligibility(UUID donorId) {
-//        DonorProfile donor = getDonorEntity(donorId);
-//        boolean isEligible = true;
-//        String reason = "";
-//
-//        // Eligibility Check conditions
-//        // 1. Age check (18-65 standard)
-//        int age = Period.between(donor.getDateOfBirth(), )
-        return null;
+        DonorProfile donor = getDonorEntity(donorId);
+        DonorGamification gamification = gamificationRepository.findByDonor(donor)
+                .orElseThrow(() -> new ResourceNotFoundException("Record not found for donor with id: "+donor.getDonorId()));
+
+        LocalDate lastDonationDate = gamification.getLastDonationDate();
+        boolean isEligible = true;
+        List<String> rejectionReasons = new ArrayList<>();
+
+        // Eligibility Check conditions
+        // 1. Age check (18-65 standard)
+        int age = Period.between(donor.getDateOfBirth(), LocalDate.now()).getYears();
+        if (age < 18 || age > 65) {
+            isEligible = false;
+            rejectionReasons.add("Age must be between 18 and 65 years");
+        }
+
+        // 2. Weight Check (Min 50kg)
+        BigDecimal minWeight = new BigDecimal("50");
+        if (donor.getWeightKg().compareTo(minWeight) < 0) {
+            isEligible = false;
+            rejectionReasons.add("Weight is below minimum requirement (50kg)");
+        }
+
+        // 3. Hemoglobin Level Check
+        BigDecimal minHemoglobin = getMinimumHemoglobin(donor.getGender());
+        if (donor.getHemoglobinLevel().compareTo(minHemoglobin) < 0) {
+            isEligible = false;
+            rejectionReasons.add("Hemoglobin level is below minimum requirement");
+        }
+
+        // 4. Check time since last donation (at least 56 days for whole blood)
+        if (lastDonationDate != null) {
+            long daysSinceLastDonation = ChronoUnit.DAYS.between(
+                    lastDonationDate, LocalDate.now()
+            );
+            if (daysSinceLastDonation < 56) {
+                isEligible = false;
+                rejectionReasons.add("Must wait at least 56 days between donations");
+            }
+        }
+
+        // 5. Check for chronic diseases
+        if (donor.getChronicDiseases() != null &&
+                !donor.getChronicDiseases().trim().isEmpty()) {
+            isEligible = false;
+            rejectionReasons.add("Chronic diseases present");
+        }
+
+        // 6. Check recent tattoos/piercings (must be at least 3 months ago)
+        if (donor.getTattooDate() != null) {
+            Period timeSinceTattoo = Period.between(donor.getTattooDate(), LocalDate.now());
+            if (timeSinceTattoo.getMonths() < 3) {
+                isEligible = false;
+                rejectionReasons.add("Recent tattoo/piercing within last 3 months");
+            }
+        }
+
+        // 7. Check recent vaccinations
+        boolean hasVaccinationRisk = checkVaccinationRisk(donor.getVaccinationStatus());
+        if (hasVaccinationRisk) {
+            isEligible = false;
+            rejectionReasons.add("Recent vaccination requiring deferral");
+        }
+
+        // 8. Check medications
+        boolean medicationsAllowed = checkMedications(donor.getMedications());
+        if (!medicationsAllowed) {
+            isEligible = false;
+            rejectionReasons.add("Medications not allowed for donation");
+        }
+
+        // 9. Check travel history
+        boolean hasTravelRisk = checkTravelRisk(donor.getRecentTravel());
+        if (hasTravelRisk) {
+            isEligible = false;
+            rejectionReasons.add("Recent travel to high-risk area");
+        }
+
+        // 10. Check allergies that might affect donation
+        if (donor.getAllergies() != null &&
+                hasSevereAllergies(donor.getAllergies())) {
+            isEligible = false;
+            rejectionReasons.add("Severe allergies present");
+        }
+
+
+        // Combine all rejection reasons
+        String reason = isEligible ? "" : String.join("; ", rejectionReasons);
+
+        // Create eligibility check record
+        EligibilityCheck check = new EligibilityCheck();
+        check.setDonor(donor);
+        check.setOverallEligible(isEligible);
+        check.setReasonIfIneligible(reason);
+        check.setAgeYears(age);
+        check.setMinWeightKg(minWeight);
+        check.setMinHemoglobin(minHemoglobin);
+        check.setMedicalConditionsClear(donor.getChronicDiseases() == null ||
+                donor.getChronicDiseases().trim().isEmpty());
+        check.setMedicationsAllowed(medicationsAllowed);
+        check.setTravelRisk(hasTravelRisk);
+        check.setTattooRisk(donor.getTattooDate() != null &&
+                Period.between(donor.getTattooDate(), LocalDate.now()).getMonths() < 3);
+        check.setVaccinationRisk(hasVaccinationRisk);
+
+        // Calculate days since last donation
+        if (lastDonationDate != null) {
+            check.setLastDonationDays((int) ChronoUnit.DAYS.between(
+                    lastDonationDate, LocalDate.now()
+            ));
+        }
+
+        // Save the eligibility check
+        EligibilityCheck savedCheck = eligibilityRepository.save(check);
+
+        // Create and return response (assuming EligibilityCheckResponse exists)
+        return createEligibilityResponse(savedCheck);
     }
 
     @Override
@@ -114,6 +229,19 @@ public class DonorServiceImpl implements DonorService {
                 .verificationStatus(donor.getVerificationStatus())
                 .badgeLevel(game.getBadgeLevel())
                 .totalPoints(game.getTotalPoints())
+                .build();
+    }
+
+    private EligibilityCheckResponse createEligibilityResponse(EligibilityCheck check) {
+        return EligibilityCheckResponse.builder()
+                .checkId(check.getCheckId())
+                .checkTimestamp(check.getCheckTimestamp())
+                .overallEligible(check.getOverallEligible())
+                .reasonIfIneligible(check.getReasonIfIneligible())
+                .lastDonationDays(check.getLastDonationDays())
+                .medicalConditionsClear(check.getMedicalConditionsClear())
+                .travelRisk(check.getTravelRisk())
+                .vaccinationRisk(check.getVaccinationRisk())
                 .build();
     }
 }
