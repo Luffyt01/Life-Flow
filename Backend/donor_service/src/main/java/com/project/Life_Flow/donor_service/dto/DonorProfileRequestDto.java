@@ -2,7 +2,6 @@ package com.project.Life_Flow.donor_service.dto;
 
 import com.project.Life_Flow.donor_service.entities.enums.BloodType;
 import com.project.Life_Flow.donor_service.entities.enums.Gender;
-import com.project.Life_Flow.donor_service.entities.enums.VaccinationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,5 +26,5 @@ public class DonorProfileRequestDto {
     private String medications;
     private LocalDate tattooDate;
     private String recentTravel;
-    private VaccinationStatus vaccinationStatus;
+    private String vaccinationStatus;
 }
