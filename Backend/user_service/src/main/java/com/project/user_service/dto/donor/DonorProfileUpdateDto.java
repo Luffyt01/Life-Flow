@@ -25,6 +25,6 @@ public class DonorProfileUpdateDto {
     private LocalDate tattooDate;
     private String recentTravel;
     private VaccinationStatus vaccinationStatus;
-    private UUID preferredCenterId;
+//    private UUID preferredCenterId;
     private LocalDate lastDonationDate;
 }

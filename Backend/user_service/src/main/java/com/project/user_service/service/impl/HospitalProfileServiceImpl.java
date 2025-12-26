@@ -50,16 +50,11 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
         HospitalProfileEntity hospitalProfile = modelMapper.map(createDto, HospitalProfileEntity.class);
         hospitalProfile.setUser(user);
         hospitalProfile.setVerified(false);
-        
-        // Handle Geometry Point creation
-        if (createDto.getLatitude() != null && createDto.getLongitude() != null) {
-            Point location = GeometryUtil.createPoint(createDto.getLatitude(), createDto.getLongitude());
-            hospitalProfile.setLocation(location);
-        }
+
 
         HospitalProfileEntity savedProfile = hospitalProfileRepository.save(hospitalProfile);
         log.info("Hospital profile created successfully for user ID: {}", userId);
-        return mapToResponseDto(savedProfile);
+        return modelMapper.map(savedProfile, HospitalProfileResponseDto.class);
     }
 
     @Override
@@ -70,7 +65,7 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
                     log.error("Hospital profile not found for user ID: {}", userId);
                     return new RuntimeException("Hospital profile not found");
                 });
-        return mapToResponseDto(hospitalProfile);
+        return modelMapper.map(hospitalProfile, HospitalProfileResponseDto.class);
     }
 
     @Override
@@ -87,14 +82,14 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
         modelMapper.map(updateDto, hospitalProfile);
 
         // Handle Geometry Point update
-        if (updateDto.getLatitude() != null && updateDto.getLongitude() != null) {
-            Point location = GeometryUtil.createPoint(updateDto.getLatitude(), updateDto.getLongitude());
-            hospitalProfile.setLocation(location);
-        }
+//        if (updateDto.getLatitude() != null && updateDto.getLongitude() != null) {
+//            Point location = GeometryUtil.createPoint(updateDto.getLatitude(), updateDto.getLongitude());
+//            hospitalProfile.setLocation(location);
+//        }
 
         HospitalProfileEntity updatedProfile = hospitalProfileRepository.save(hospitalProfile);
         log.info("Hospital profile updated successfully for user ID: {}", userId);
-        return mapToResponseDto(updatedProfile);
+        return modelMapper.map(updatedProfile, HospitalProfileResponseDto.class);
     }
 
     @Override
@@ -109,12 +104,19 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
         log.info("Hospital profile deleted successfully for user ID: {}", userId);
     }
 
-    private HospitalProfileResponseDto mapToResponseDto(HospitalProfileEntity entity) {
-        HospitalProfileResponseDto dto = modelMapper.map(entity, HospitalProfileResponseDto.class);
-        if (entity.getLocation() != null) {
-            dto.setLatitude(entity.getLocation().getY());
-            dto.setLongitude(entity.getLocation().getX());
+    @Override
+    public boolean getVerifyStatus(UUID hospitalId) {
+        return hospitalProfileRepository.isVerified(hospitalId);
+    }
+
+    @Override
+    public void verifyStatus(UUID hospitalId) {
+        try {
+            hospitalProfileRepository.updateVerifyStatusById(hospitalId);
+        }catch (Exception e){
+            log.error("error in verifying status",e);
+            throw new RuntimeException("error in verifying status");
         }
-        return dto;
+
     }
 }

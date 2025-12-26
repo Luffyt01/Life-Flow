@@ -31,28 +31,35 @@ public class DonorProfileServiceImpl implements DonorProfileService {
     @Override
     @Transactional
     public DonorProfileResponseDto createDonorProfile(UUID userId, DonorProfileCreateDto createDto) {
-        log.info("Creating donor profile for user ID: {}", userId);
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.error("User not found with ID: {}", userId);
-                    return new RuntimeException("User not found");
-                });
+        try {
+            log.info("Creating donor profile for user ID: {}", userId);
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> {
+                        log.error("User not found with ID: {}", userId);
+                        return new RuntimeException("User not found");
+                    });
+            log.info("user", user);
 
-        if (donorProfileRepository.existsById(userId)) {
-            log.warn("Donor profile already exists for user ID: {}", userId);
-            throw new RuntimeException("Donor profile already exists");
+            if (donorProfileRepository.existsById(userId)) {
+                log.warn("Donor profile already exists for user ID: {}", userId);
+                throw new RuntimeException("Donor profile already exists");
+            }
+
+            DonorProfileEntity donorProfile = modelMapper.map(createDto, DonorProfileEntity.class);
+            donorProfile.setUser(user);
+
+            // Set default values
+            donorProfile.setEligibilityStatus(EligibilityStatus.PENDING_VERIFICATION);
+            donorProfile.setVerificationStatus(VerificationStatus.UNVERIFIED);
+
+            DonorProfileEntity savedProfile = donorProfileRepository.save(donorProfile);
+            log.info("Donor profile created successfully for user ID: {}", userId);
+            return modelMapper.map(savedProfile, DonorProfileResponseDto.class);
         }
-
-        DonorProfileEntity donorProfile = modelMapper.map(createDto, DonorProfileEntity.class);
-        donorProfile.setUser(user);
-        
-        // Set default values
-        donorProfile.setEligibilityStatus(EligibilityStatus.PENDING_VERIFICATION);
-        donorProfile.setVerificationStatus(VerificationStatus.UNVERIFIED);
-
-        DonorProfileEntity savedProfile = donorProfileRepository.save(donorProfile);
-        log.info("Donor profile created successfully for user ID: {}", userId);
-        return modelMapper.map(savedProfile, DonorProfileResponseDto.class);
+        catch (Exception e) {
+            log.error("Error creating donor profile for user ID: {}", userId, e);
+            throw new RuntimeException("Error creating donor profile", e);
+        }
     }
 
     @Override

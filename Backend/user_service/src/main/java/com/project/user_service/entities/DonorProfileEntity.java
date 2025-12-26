@@ -1,42 +1,32 @@
 package com.project.user_service.entities;
 
 import com.project.user_service.entities.enums.BloodType;
+import com.project.user_service.entities.enums.EligibilityStatus;
+import com.project.user_service.entities.enums.Gender;
+import com.project.user_service.entities.enums.VaccinationStatus;
+import com.project.user_service.entities.enums.VerificationStatus;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
 
-import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import com.project.user_service.entities.enums.EligibilityStatus;
-import com.project.user_service.entities.enums.Gender;
-import com.project.user_service.entities.enums.VaccinationStatus;
-import com.project.user_service.entities.enums.VerificationStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "donor_profiles",
         indexes = {
                 @Index(name = "idx_donor_blood_type", columnList = "bloodType"),
                 @Index(name = "idx_donor_eligibility", columnList = "eligibilityStatus"),
-                @Index(name = "idx_donor_last_donation", columnList = "lastDonationDate")
+                @Index(name = "idx_donor_last_donation", columnList = "lastDonationDate"),
+                @Index(name = "idx_donor_location", columnList = "location")
         }
 )
 @Getter
@@ -82,19 +72,15 @@ public class DonorProfileEntity {
 
     private LocalDate eligibilityExpiryDate;
 
-
     private String medicalConditions;
-
-
+    @Column(length = 500)
     private String medications;
 
-
+    @Column(length = 500)
     private String allergies;
 
     private LocalDate tattooDate;
-
-
-
+    @Column(length = 500)
     private String recentTravel;
 
     @Enumerated(EnumType.STRING)
@@ -108,13 +94,13 @@ public class DonorProfileEntity {
     @Enumerated(EnumType.STRING)
     private VerificationStatus verificationStatus;
 
-//    private String verifiedByAdmin;
+    private String verifiedByAdmin;
 
     private LocalDateTime verifiedAt;
 
     private LocalDateTime lastEligibilityCheck;
 
-//    private UUID preferredCenterId;
+    private UUID preferredCenterId;
 
     private Integer averageResponseTimeMinutes;
 
@@ -138,6 +124,7 @@ public class DonorProfileEntity {
         if (verificationStatus == null) {
             verificationStatus = VerificationStatus.UNVERIFIED;
         }
+
         if (totalDonations == null) {
             totalDonations = 0;
         }

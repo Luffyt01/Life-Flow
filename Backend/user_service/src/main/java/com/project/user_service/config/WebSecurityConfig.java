@@ -39,6 +39,8 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/**").permitAll()
                                 .requestMatchers("/auth/get-me").authenticated()
                                 .anyRequest().authenticated();
+
+
                     })
                     .csrf(csrf -> {
                         logger.debug("Disabling CSRF");

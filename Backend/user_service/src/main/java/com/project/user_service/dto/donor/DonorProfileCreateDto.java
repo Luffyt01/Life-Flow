@@ -31,5 +31,5 @@ public class DonorProfileCreateDto {
     private String recentTravel;
     private PointDTO location;
     private VaccinationStatus vaccinationStatus;
-    private UUID preferredCenterId;
+//    private UUID preferredCenterId;
 }

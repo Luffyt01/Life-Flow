@@ -22,7 +22,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleResourceNotFoundException(ResourceNotFoundException ex){
         ApiError error = ApiError.builder()
                 .status(HttpStatus.NOT_FOUND)
-                .message(ex.getMessage())
+                .message(ex.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
     }
@@ -32,7 +32,15 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleRuntimeConflictException(RuntimeConflictException exception) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.CONFLICT)
-                .message(exception.getMessage())
+                .message(exception.getLocalizedMessage())
+                .build();
+        return buildApiErrorResponseEntity(apiError);
+    }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<?>> handleRuntimeException(RuntimeException exception) {
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.CONFLICT)
+                .message(exception.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(apiError);
     }
@@ -42,7 +50,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>>  handleUserOperationException(UserOperationException ex){
         ApiError error = ApiError.builder()
                 .status(HttpStatus.NOT_FOUND)
-                .message(ex.getMessage())
+                .message(ex.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
     }
@@ -51,7 +59,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleAuthenticationException(AuthenticationException ex) {
         ApiError error = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message(ex.getMessage())
+                .message(ex.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
     }
@@ -60,7 +68,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleForgetPasswordTokenExpiredException(TokenExpireException ex) {
         ApiError error = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message(ex.getMessage())
+                .message(ex.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
     }
@@ -69,7 +77,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleMailSendingErrorException(MailSendingErrorException ex) {
         ApiError error = ApiError.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .message(ex.getMessage())
+                .message(ex.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
     }
@@ -78,7 +86,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleJwtException(JwtException ex) {
         ApiError error = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message(ex.getMessage())
+                .message(ex.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
     }
@@ -87,7 +95,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(AccessDeniedException ex) {
         ApiError error = ApiError.builder()
                 .status(HttpStatus.FORBIDDEN)
-                .message(ex.getMessage())
+                .message(ex.getLocalizedMessage())
                 .build();
         return buildApiErrorResponseEntity(error);
     }
@@ -112,7 +120,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiError> handleInvalidTokenException(InvalidTokenException e){
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message(e.getMessage())
+                .message(e.getLocalizedMessage())
                 .build();
         return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
@@ -121,7 +129,7 @@ public class GlobalExceptionHandler  {
     public ResponseEntity<ApiError> handleSessionAuthenticationException(SessionAuthenticationException e){
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message(e.getMessage())
+                .message(e.getLocalizedMessage())
                 .build();
         return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }

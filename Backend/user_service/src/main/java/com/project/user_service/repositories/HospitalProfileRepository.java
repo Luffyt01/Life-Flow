@@ -19,7 +19,7 @@ public interface HospitalProfileRepository extends JpaRepository<HospitalProfile
     @Modifying
     @Transactional
     @Query("update HospitalProfileEntity  h set h.isVerified = true where h.hospitalId = :hospitalId ")
-    void updateStatusById(UUID hospitalId);
+    void updateVerifyStatusById(UUID hospitalId);
 
     @Query("SELECT h.isVerified FROM HospitalProfileEntity h WHERE h.hospitalId = :hospitalId")
     boolean isVerified(@Param("hospitalId") UUID hospitalId);
