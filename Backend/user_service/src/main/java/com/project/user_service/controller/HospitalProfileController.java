@@ -56,6 +56,12 @@ public class HospitalProfileController {
     hospitalProfileService.verifyStatus(hospitalId);
     return ResponseEntity.ok("Status changed successfully");
     }
+    @PutMapping("/update-verification-status")
+    public ResponseEntity<String> verifyStatusChange(){
+        UUID hospitalId = getUserIdFromAuthentication();
+    hospitalProfileService.verifyStatus(hospitalId);
+    return ResponseEntity.ok("Status changed successfully");
+    }
     @GetMapping("/verification-status")
     public ResponseEntity<HospitalStatusDto> getVerifyStatusChange(){
         UUID hospitalId = getUserIdFromAuthentication();
