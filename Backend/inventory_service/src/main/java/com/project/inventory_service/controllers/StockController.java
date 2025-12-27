@@ -26,12 +26,18 @@ public class StockController {
     private final StockService stockService;
     private final JwtParser jwtParser;
 
-    @GetMapping("/summary/{bloodType}")
+    @GetMapping("/{bloodType}")
     public ResponseEntity<StockResponseDto> getStockSummary(
             @PathVariable BloodType bloodType,
-            @RequestParam UUID hospitalId) {
-        log.info("Received request for stock summary - BloodType: {}, HospitalId: {}", bloodType, hospitalId);
-        StockSummaryDto summary = stockService.getStockSummary(bloodType, hospitalId);
+            @RequestParam(required = false) UUID centerId,
+            @RequestParam(required = false) String status) {
+        
+        if (centerId == null) {
+             return ResponseEntity.badRequest().body(createSuccessResponse("Center ID is required", null));
+        }
+
+        log.info("Received request for stock summary - BloodType: {}, CenterId: {}", bloodType, centerId);
+        StockSummaryDto summary = stockService.getStockSummary(bloodType, centerId);
         return ResponseEntity.ok(createSuccessResponse("Stock summary retrieved successfully", summary));
     }
 
@@ -42,7 +48,7 @@ public class StockController {
         return ResponseEntity.ok(createSuccessResponse("Hospital stock retrieved successfully", stockList));
     }
 
-    @GetMapping("/blood-type/{bloodType}")
+    @GetMapping("/blood-type/{bloodType}/all")
     public ResponseEntity<StockResponseDto> getStockByBloodType(@PathVariable BloodType bloodType) {
         log.info("Received request for all stock of blood type: {}", bloodType);
         List<StockSummaryDto> stockList = stockService.getStockByBloodType(bloodType);
@@ -52,7 +58,10 @@ public class StockController {
     @PostMapping("/update")
     public ResponseEntity<StockResponseDto> updateStock(HttpServletRequest req, @Valid @RequestBody StockUpdateDto updateDto) {
         UUID userId = jwtParser.getUserId(req);
-        updateDto.setHospitalId(userId);
+        // If centerId is not in DTO, use userId. 
+        if (updateDto.getCenterId() == null) {
+            updateDto.setCenterId(userId);
+        }
         log.info("Received stock update request: {}", updateDto);
         StockSummaryDto updatedStock = stockService.updateStock(updateDto);
         return ResponseEntity
@@ -66,12 +75,28 @@ public class StockController {
         List<StockSummaryDto> stockList = stockService.getStockNeedingReorder();
         return ResponseEntity.ok(createSuccessResponse("Stock needing reorder retrieved successfully", stockList));
     }
+    
+    @PostMapping("/alert-threshold")
+    public ResponseEntity<StockResponseDto> setLowStockAlert(@RequestBody StockUpdateDto updateDto) {
+        // This endpoint is to set threshold.
+        // Input: blood_type, center_id, threshold_units, notification_emails
+        // We can reuse updateStock logic if we handle threshold update in service.
+        // Assuming updateStock handles it if thresholdUnits is present.
+        
+        log.info("Received alert threshold update request: {}", updateDto);
+        StockSummaryDto updatedStock = stockService.updateStock(updateDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(createSuccessResponse("Alert threshold set successfully", updatedStock));
+    }
 
     @PostMapping("/initialize")
     public ResponseEntity<StockResponseDto> initializeStock(HttpServletRequest req, @Valid @RequestBody StockUpdateDto initDto) {
         log.info("Received stock initialization request: {}", initDto);
         UUID userId = jwtParser.getUserId(req);
-        initDto.setHospitalId(userId);
+        if (initDto.getCenterId() == null) {
+            initDto.setCenterId(userId);
+        }
         StockSummaryDto initializedStock = stockService.initializeStock(initDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -34,6 +34,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Override
     @Transactional
     public TransactionResponseDto createTransaction(TransactionRequestDto requestDto) {
+        log.info("Creating transaction for bag ID: {}", requestDto.getBagId());
         try {
             // Find the blood bag
 //            BloodInventoryEntity bloodBag = bloodInventoryRepository.findById(requestDto.getBagId())
@@ -43,12 +44,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
             InventoryTransactionsEntity transaction = InventoryTransactionsEntity.builder()
                     .bagId(requestDto.getBagId())
                     .transactionType(requestDto.getTransactionType())
-                    .quantity(requestDto.getQuantity())
-                    .fromLocation(requestDto.getFromLocation())
-                    .toLocation(requestDto.getToLocation())
+                    .fromCenterId(requestDto.getFromCenterId())
+                    .toCenterId(requestDto.getToCenterId())
                     .notes(requestDto.getNotes())
-                    .hospitalId(requestDto.getHospitalId())
-                    .requestId(requestDto.getRequestId())
+                    .hospitalId(requestDto.getHospitalId()) // Assuming this is passed or derived
+                    .requestId(requestDto.getRequestId()) // Assuming this is passed
+                    .previousStatus(requestDto.getPreviousStatus())
+                    .newStatus(requestDto.getNewStatus())
+                    .performedBy(requestDto.getPerformedBy())
                     .build();
 
             InventoryTransactionsEntity savedTransaction = transactionsRepository.save(transaction);
@@ -57,27 +60,47 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
             return modelMapper.map(savedTransaction,TransactionResponseDto.class);
             
         } catch (Exception e) {
-            log.error("Error creating transaction: {}", e.getMessage());
+            log.error("Error creating transaction: {}", e.getMessage(), e);
             throw new RuntimeConflictException("Error creating transaction: " + e.getMessage());
         }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TransactionResponseDto getTransactionById(UUID transactionId) {
-        InventoryTransactionsEntity transaction = transactionsRepository.findById(transactionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
-        return modelMapper.map(transaction,TransactionResponseDto.class);
+        log.info("Fetching transaction with ID: {}", transactionId);
+        try {
+            InventoryTransactionsEntity transaction = transactionsRepository.findById(transactionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
+            return modelMapper.map(transaction,TransactionResponseDto.class);
+        } catch (ResourceNotFoundException e) {
+            log.warn("Transaction not found: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error fetching transaction: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching transaction: " + e.getMessage());
+        }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TransactionResponseDto> getTransactionsByBagId(UUID bagId) {
-        List<InventoryTransactionsEntity> transactions = transactionsRepository.findByBagId(bagId);
-         return Collections.singletonList(modelMapper.map(transactions, TransactionResponseDto.class));
-
+        log.info("Fetching transactions for bag ID: {}", bagId);
+        try {
+            List<InventoryTransactionsEntity> transactions = transactionsRepository.findByBagId(bagId);
+             return transactions.stream()
+                     .map(t -> modelMapper.map(t, TransactionResponseDto.class))
+                     .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching transactions by bag ID: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching transactions by bag ID: " + e.getMessage());
+        }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TransactionResponseDto> getTransactionsByType(UUID hospitalId,TransactionType transactionType) {
+        log.info("Fetching transactions by type: {} for hospital: {}", transactionType, hospitalId);
         try {
 //            TransactionType type = TransactionType.valueOf(transactionType.toUpperCase());
             if(transactionType == null){
@@ -85,17 +108,32 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                         .map(transaction -> modelMapper.map(transaction, TransactionResponseDto.class))
                         .collect(Collectors.toList());
             }
-            List<InventoryTransactionsEntity> transactions = transactionsRepository.findByTransactionType(hospitalId,transactionType);
-            return Collections.singletonList(modelMapper.map(transactions, TransactionResponseDto.class));
+            List<InventoryTransactionsEntity> transactions = transactionsRepository.findByTransactionTypeAndHospitalId(hospitalId,transactionType);
+            return transactions.stream()
+                    .map(t -> modelMapper.map(t, TransactionResponseDto.class))
+                    .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
+            log.error("Invalid transaction type: {}", transactionType);
             throw new RuntimeConflictException("Invalid transaction type: " + transactionType);
+        } catch (Exception e) {
+            log.error("Error fetching transactions by type: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching transactions by type: " + e.getMessage());
         }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TransactionResponseDto> getTransactionsByRequestId(UUID requestId) {
-        List<InventoryTransactionsEntity> transactions = transactionsRepository.findByRequestId(requestId);
-        return Collections.singletonList(modelMapper.map(transactions, TransactionResponseDto.class));
+        log.info("Fetching transactions for request ID: {}", requestId);
+        try {
+            List<InventoryTransactionsEntity> transactions = transactionsRepository.findByRequestId(requestId);
+            return transactions.stream()
+                    .map(t -> modelMapper.map(t, TransactionResponseDto.class))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching transactions by request ID: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching transactions by request ID: " + e.getMessage());
+        }
     }
 
 }

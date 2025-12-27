@@ -1,34 +1,35 @@
 package com.project.inventory_service.dto;
 
+import com.project.inventory_service.entities.enums.StatusType;
 import com.project.inventory_service.entities.enums.TransactionType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionRequestDto {
     @NotNull(message = "Bag ID is required")
     private UUID bagId;
 
-
-    private UUID hospitalId;
+    private UUID fromCenterId;
+    private UUID toCenterId;
 
     @NotNull(message = "Transaction type is required")
     private TransactionType transactionType;
-    
-    @Positive(message = "Quantity must be a positive number")
-    private int quantity;
-    
-    @NotBlank(message = "Source location is required")
-    private String fromLocation;
-    
-    @NotBlank(message = "Destination location is required")
-    private String toLocation;
 
+    private StatusType previousStatus;
+    private StatusType newStatus;
+
+    private UUID performedBy;
     private String notes;
     
     private UUID requestId;
+    private UUID hospitalId;
 }

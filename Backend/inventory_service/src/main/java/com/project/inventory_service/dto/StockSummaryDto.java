@@ -9,7 +9,7 @@ import java.util.UUID;
 public class StockSummaryDto {
     private UUID stockId;
     private BloodType bloodType;
-    private UUID hospitalId;
+    private UUID centerId;
     private int totalUnits;
     private int availableUnits;
     private int reservedUnits;

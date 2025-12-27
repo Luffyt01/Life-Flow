@@ -19,7 +19,7 @@ import java.util.UUID;
 @Table(name = "stock_summaries",
         indexes = {
                 @Index(name = "blood_type_idx", columnList = "bloodType"),
-                @Index(name = "hospital_id_idx", columnList = "hospitalId")
+                @Index(name = "center_id_idx", columnList = "centerId")
         }
 )
 public class StockSummaryEntity {
@@ -33,7 +33,7 @@ public class StockSummaryEntity {
     private BloodType bloodType;
 
     @Column(nullable = false)
-    private UUID hospitalId;
+    private UUID centerId;
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int totalUnits = 0;

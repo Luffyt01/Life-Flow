@@ -17,10 +17,9 @@ public class TransactionResponseDto {
     private UUID transactionId;
     private UUID bagId;
     private TransactionType transactionType;
-    private int quantity;
-    private String fromLocation;
-    private String toLocation;
+    private UUID fromCenterId;
+    private UUID toCenterId;
     private String notes;
-    private LocalDateTime transactionDate;
+    private LocalDateTime createdAt;
     private UUID requestId;
 }

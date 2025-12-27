@@ -13,9 +13,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "expiry_management",
         indexes = {
-                @Index(name = "idx_bag_id", columnList = "bagId"),
-                @Index(name = "idx_alert_level", columnList = "alertLevel"),
-                @Index(name = "hospital_id_idx", columnList = "hospitalId")
+                @Index(name = "idx_bag_id", columnList = "blood_inventory_bag_id"),
+                @Index(name = "idx_alert_level", columnList = "alertLevel")
         })
 @Data
 @Builder
@@ -30,7 +29,7 @@ public class ExpiryManagementEntity {
     private UUID expiryAlertId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "bag_id", nullable = false, referencedColumnName = "bagId")
+    @JoinColumn(name = "blood_inventory_bag_id", nullable = false)
     private BloodInventoryEntity bloodInventory;
 
     private long daysUntilExpiry;

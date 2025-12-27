@@ -15,9 +15,9 @@ import java.util.UUID;
 @Repository
 public interface StockSummaryRepository extends JpaRepository<StockSummaryEntity, UUID> {
 
-    Optional<StockSummaryEntity> findByBloodTypeAndHospitalId(BloodType bloodType, UUID hospitalId);
+    Optional<StockSummaryEntity> findByBloodTypeAndCenterId(BloodType bloodType, UUID centerId);
 
-    List<StockSummaryEntity> findByHospitalId(UUID hospitalId);
+    List<StockSummaryEntity> findByCenterId(UUID centerId);
 
     List<StockSummaryEntity> findByBloodType(BloodType bloodType);
 
@@ -38,5 +38,5 @@ public interface StockSummaryRepository extends JpaRepository<StockSummaryEntity
     );
 
 
-    boolean existsByBloodTypeAndHospitalId(BloodType bloodType, UUID hospitalId);
+    boolean existsByBloodTypeAndCenterId(BloodType bloodType, UUID centerId);
 }

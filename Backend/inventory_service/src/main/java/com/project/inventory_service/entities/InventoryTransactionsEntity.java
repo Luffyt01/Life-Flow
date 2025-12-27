@@ -1,6 +1,7 @@
 package com.project.inventory_service.entities;
 
 import com.project.inventory_service.entities.enums.TransactionType;
+import com.project.inventory_service.entities.enums.StatusType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,11 +19,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "inventory_transactions",
    indexes = {
-        @Index(name="bag_id_idx",columnList = "bagId"),
-        @Index(name="transaction_type_idx",columnList = "transactionType"),
-        @Index(name="transaction_date_idx",columnList = "transactionDate"),
-        @Index(name="request_id_idx",columnList = "requestId"),
-           @Index(name = "hospital_id_idx",columnList = "hospitalId")
+        @Index(name="idx_inventory_transactions_bag", columnList = "bagId"),
+        @Index(name="idx_inventory_transactions_date", columnList = "createdAt DESC")
    }
 )
 public class InventoryTransactionsEntity {
@@ -31,38 +29,35 @@ public class InventoryTransactionsEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID transactionId;
 
+    @Column(nullable = false)
     private UUID bagId;
 
-    private UUID hospitalId;
+    private UUID fromCenterId;
+
+    private UUID toCenterId;
 
     @Enumerated(EnumType.STRING)
-    @Column( nullable = false)
+    @Column(nullable = false, length = 20)
     private TransactionType transactionType;
 
-    @Column( nullable = false)
-    private int  quantity=1;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private StatusType previousStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private StatusType newStatus;
 
-    @Column( nullable = false,length = 255)
-    private String fromLocation;
+    private UUID performedBy;
 
-    @Column( nullable = false,length = 255)
-    private String toLocation;
-
-
-    private UUID requestId;
-
-    @Column(length = 255)
-    private String performBy;
-
+    @Column(columnDefinition = "TEXT")
     private String notes;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime transactionDate;
+    private UUID requestId;
+    
+    private UUID hospitalId;
 
     @CreationTimestamp
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
-
 }

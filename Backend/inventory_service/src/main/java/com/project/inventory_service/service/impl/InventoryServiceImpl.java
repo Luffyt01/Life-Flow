@@ -26,10 +26,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Service implementation for managing blood inventory operations.
- * Handles CRUD operations, status updates, and inventory management.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,13 +38,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final ExpiryManagementRepository expiryManagementRepository;
 
 
-    /**
-     * Creates a new blood inventory record and sets up expiry management.
-     *
-     * @param bloodBagDto DTO containing blood bag details
-     * @return Created blood bag DTO
-     * @throws ErrorInSavingDataInDatabase if there's an error saving the data
-     */
+  
     @Override
     @Transactional
     public BloodBagDto createBloodInventory(BloodBagDto bloodBagDto) {
@@ -66,7 +56,7 @@ public class InventoryServiceImpl implements InventoryService {
             log.debug("Blood inventory saved successfully with ID: {}", savedBloodInventory.getBagId());
             // Calculate and set expiry information
             long daysUntilExpiry = ChronoUnit.DAYS.between(
-                    savedBloodInventory.getCollectionDate(),
+                    savedBloodInventory.getDonationDate(),
                     savedBloodInventory.getExpiryDate()
             );
 
@@ -89,46 +79,42 @@ public class InventoryServiceImpl implements InventoryService {
         }
     }
 
-    /**
-     * Retrieves a blood bag by its ID.
-     *
-     * @param id The UUID of the blood bag
-     * @return Blood bag DTO
-     * @throws ResourceNotFoundException if the bag is not found
-     */
+  
     @Override
+    @Transactional()
     public BagResponseDto getBagById(UUID id) {
         log.info("Fetching blood bag with ID: {}", id);
 
-        BloodInventoryEntity bloodBag = bloodInventoryRepository.findByBagId(id)
-                .orElseThrow(() -> {
-                    log.warn("Blood bag not found with ID: {}", id);
-                    return new ResourceNotFoundException(BAG_NOT_FOUND + id);
-                });
+        try {
+            BloodInventoryEntity bloodBag = bloodInventoryRepository.findByBagId(id)
+                    .orElseThrow(() -> {
+                        log.warn("Blood bag not found with ID: {}", id);
+                        return new ResourceNotFoundException(BAG_NOT_FOUND + id);
+                    });
 
-        log.debug("Successfully retrieved blood bag with ID: {}", id);
-        return modelMapper.map(bloodBag, BagResponseDto.class);
+            log.debug("Successfully retrieved blood bag with ID: {}", id);
+            return modelMapper.map(bloodBag, BagResponseDto.class);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error fetching blood bag: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching blood bag: " + e.getMessage());
+        }
     }
 
-    /**
-     * Updates an existing blood bag's information.
-     *
-     * @param id          The UUID of the blood bag to update
-     * @param bloodBagDto DTO containing updated information
-     * @return Updated blood bag DTO
-     * @throws ResourceNotFoundException if the bag is not found
-     */
+   
     @Override
+    @Transactional
     public void updateBag(UUID id, BagUpdateDto bloodBagDto) {
         log.info("Updating blood bag with ID: {}", id);
 
-        // Verify bag exists
-        if (!bloodInventoryRepository.existsByBagId(id)) {
-            log.warn("Attempted to update non-existent blood bag with ID: {}", id);
-            throw new ResourceNotFoundException(BAG_NOT_FOUND + id);
-        }
-
         try {
+            // Verify bag exists
+            if (!bloodInventoryRepository.existsByBagId(id)) {
+                log.warn("Attempted to update non-existent blood bag with ID: {}", id);
+                throw new ResourceNotFoundException(BAG_NOT_FOUND + id);
+            }
+
             log.debug("Updating blood bag status and units available");
              bloodInventoryRepository.updateBag(
                     id,
@@ -139,25 +125,20 @@ public class InventoryServiceImpl implements InventoryService {
             log.info("Successfully updated blood bag with ID: {}", id);
             return ;
 
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error updating blood bag with ID {}: {}", id, e.getMessage(), e);
             throw new RuntimeConflictException("Error updating blood bag: " + e.getMessage());
         }
     }
-
-    /**
-     * Searches for blood bags by blood type and status.
-     *
-     * @param bloodType The blood type to filter by
-     * @param statusType The status to filter by
-     * @return List of matching blood bag DTOs
-     */
     @Override
-    public List<BagResponseDto> searchBags(BloodType bloodType, StatusType statusType) {
+    @Transactional()
+    public List<BagResponseDto> searchBags(UUID centerId,BloodType bloodType, StatusType statusType) {
         log.info("Searching for blood bags with type: {} and status: {}", bloodType, statusType);
 
         try {
-            List<BloodInventoryEntity> results = bloodInventoryRepository.findByBloodTypeAndStatusType(bloodType, statusType);
+            List<BloodInventoryEntity> results = bloodInventoryRepository.findByBloodTypeAndStatusType(centerId,bloodType, statusType);
             log.debug("Found {} matching blood bags", results.size());
             return modelMapper.map(results, List.class);
 
@@ -177,21 +158,24 @@ public class InventoryServiceImpl implements InventoryService {
      * @throws ResourceNotFoundException if the bag is not found
      */
     @Override
+    @Transactional
     public void releaseBag(UUID id) {
         log.info("Releasing blood bag with ID: {}", id);
 
-        // Verify bag exists
-        if (!bloodInventoryRepository.existsByBagId(id)) {
-            log.warn("Attempted to release non-existent blood bag with ID: {}", id);
-            throw new ResourceNotFoundException(BAG_NOT_FOUND + id);
-        }
-
         try {
+            // Verify bag exists
+            if (!bloodInventoryRepository.existsByBagId(id)) {
+                log.warn("Attempted to release non-existent blood bag with ID: {}", id);
+                throw new ResourceNotFoundException(BAG_NOT_FOUND + id);
+            }
+
             log.debug("Updating blood bag status to AVAILABLE");
             bloodInventoryRepository.updateBagRelease(id, StatusType.AVAILABLE);
             log.info("Successfully released blood bag with ID: {}", id);
             return ;
 
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error releasing blood bag with ID {}: {}", id, e.getMessage(), e);
             throw new RuntimeConflictException("Error releasing blood bag: " + e.getMessage());
@@ -207,16 +191,17 @@ public class InventoryServiceImpl implements InventoryService {
      * @throws ResourceNotFoundException if the bag is not found
      */
     @Override
+    @Transactional
     public void updateQuality(UUID id, UpdateQualityDto qualityDto) {
         log.info("Updating quality check for blood bag with ID: {}", id);
 
-        // Verify bag exists
-        if (!bloodInventoryRepository.existsByBagId(id)) {
-            log.warn("Attempted to update quality for non-existent blood bag with ID: {}", id);
-            throw new ResourceNotFoundException(BAG_NOT_FOUND + id);
-        }
-
         try {
+            // Verify bag exists
+            if (!bloodInventoryRepository.existsByBagId(id)) {
+                log.warn("Attempted to update quality for non-existent blood bag with ID: {}", id);
+                throw new ResourceNotFoundException(BAG_NOT_FOUND + id);
+            }
+
             log.debug("Updating quality check information");
             bloodInventoryRepository.updateQualityCheck(
                     id,
@@ -228,6 +213,8 @@ public class InventoryServiceImpl implements InventoryService {
             log.info("Successfully updated quality check for blood bag with ID: {}", id);
             return ;
 
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error updating quality check for blood bag with ID {}: {}", id, e.getMessage(), e);
             throw new RuntimeConflictException("Error updating quality check: " + e.getMessage());

@@ -14,13 +14,13 @@ import java.util.UUID;
 @Repository
 public interface ExpiryManagementRepository extends JpaRepository<ExpiryManagementEntity, String> {
 
- @Query("SELECT  e from  ExpiryManagementEntity e where e.bloodInventory.hospitalId= :hospitalId and e.alertLevel= :alertLevel")
- List<ExpiryManagementEntity> findByAlertLevel(UUID hospitalId, AlertLevel alertLevel);
+ @Query("SELECT  e from  ExpiryManagementEntity e where e.bloodInventory.collectionCenterId= :collectionCenterId and e.alertLevel= :alertLevel")
+ List<ExpiryManagementEntity> findByAlertLevel(UUID collectionCenterId, AlertLevel alertLevel);
 
  @Modifying
  @Query(value = """
     UPDATE expiry_management em
-    INNER JOIN blood_inventory bi ON em.bag_id = bi.bag_id
+    INNER JOIN blood_inventory bi ON em.blood_inventory_bag_id = bi.bag_id
     SET 
         em.days_until_expiry = DATEDIFF(bi.expiry_date, CURDATE()),
         em.alert_level = CASE 
@@ -35,6 +35,6 @@ public interface ExpiryManagementRepository extends JpaRepository<ExpiryManageme
  int updateExpiryStatus();
 
 
- @Query("SELECT e FROM ExpiryManagementEntity e WHERE e.bloodInventory.hospitalId = :hospitalId")
+ @Query("SELECT e FROM ExpiryManagementEntity e WHERE e.bloodInventory.collectionCenterId = :hospitalId")
  List<ExpiryManagementEntity> findAllByHospitalId(UUID hospitalId);
 }

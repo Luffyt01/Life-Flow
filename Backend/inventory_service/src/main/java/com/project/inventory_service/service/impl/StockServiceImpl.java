@@ -5,6 +5,7 @@ import com.project.inventory_service.dto.StockUpdateDto;
 import com.project.inventory_service.entities.StockSummaryEntity;
 import com.project.inventory_service.entities.enums.BloodType;
 import com.project.inventory_service.exceptions.ExceptionTypes.ResourceNotFoundException;
+import com.project.inventory_service.exceptions.ExceptionTypes.RuntimeConflictException;
 import com.project.inventory_service.repositories.StockSummaryRepository;
 import com.project.inventory_service.service.StockService;
 import lombok.RequiredArgsConstructor;
@@ -29,77 +30,115 @@ public class StockServiceImpl implements StockService {
     @Transactional(readOnly = true)
     public StockSummaryDto getStockSummary(BloodType bloodType, UUID hospitalId) {
         log.info("Fetching stock summary for blood type {} at hospital {}", bloodType, hospitalId);
-        StockSummaryEntity entity = stockSummaryRepository.findByBloodTypeAndHospitalId(bloodType, hospitalId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Stock not found for blood type %s at hospital %s", bloodType, hospitalId)
-                ));
-        return convertToDto(entity);
+        try {
+            StockSummaryEntity entity = stockSummaryRepository.findByBloodTypeAndCenterId(bloodType, hospitalId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            String.format("Stock not found for blood type %s at hospital %s", bloodType, hospitalId)
+                    ));
+            return convertToDto(entity);
+        } catch (ResourceNotFoundException e) {
+            log.warn("Stock not found: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error fetching stock summary: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching stock summary: " + e.getMessage());
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StockSummaryDto> getStockByHospital(UUID hospitalId) {
         log.info("Fetching all stock for hospital {}", hospitalId);
-        return stockSummaryRepository.findByHospitalId(hospitalId).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        try {
+            return stockSummaryRepository.findByCenterId(hospitalId).stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching stock by hospital: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching stock by hospital: " + e.getMessage());
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StockSummaryDto> getStockByBloodType(BloodType bloodType) {
         log.info("Fetching all stock for blood type {}", bloodType);
-        return stockSummaryRepository.findByBloodType(bloodType).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        try {
+            return stockSummaryRepository.findByBloodType(bloodType).stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching stock by blood type: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching stock by blood type: " + e.getMessage());
+        }
     }
 
     @Override
     @Transactional
     public StockSummaryDto updateStock(StockUpdateDto updateDto) {
         log.info("Updating stock: {}", updateDto);
-        
-        StockSummaryEntity entity = stockSummaryRepository
-                .findByBloodTypeAndHospitalId(updateDto.getBloodType(), updateDto.getHospitalId())
-                .orElseGet(() -> createNewStockEntry(updateDto));
-        
-        entity.updateStock(
-            updateDto.getQuantity(),
-            updateDto.isReserved(),
-            updateDto.isExpired()
-        );
-        
-        StockSummaryEntity savedEntity = stockSummaryRepository.save(entity);
-        log.info("Stock updated successfully: {}", savedEntity.getStockId());
-        
-        return convertToDto(savedEntity);
+        try {
+            StockSummaryEntity entity = stockSummaryRepository
+                    .findByBloodTypeAndCenterId(updateDto.getBloodType(), updateDto.getCenterId())
+                    .orElseGet(() -> createNewStockEntry(updateDto));
+            
+            if (updateDto.getThresholdUnits() != null) {
+                entity.setReorderThreshold(updateDto.getThresholdUnits());
+            }
+            
+            entity.updateStock(
+                updateDto.getQuantity(),
+                updateDto.isReserved(),
+                updateDto.isExpired()
+            );
+            
+            StockSummaryEntity savedEntity = stockSummaryRepository.save(entity);
+            log.info("Stock updated successfully: {}", savedEntity.getStockId());
+            
+            return convertToDto(savedEntity);
+        } catch (Exception e) {
+            log.error("Error updating stock: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error updating stock: " + e.getMessage());
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StockSummaryDto> getStockNeedingReorder() {
         log.info("Fetching all stock that needs reorder");
-        return stockSummaryRepository.findByNeedsReorder(true).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        try {
+            return stockSummaryRepository.findByNeedsReorder(true).stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching stock needing reorder: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error fetching stock needing reorder: " + e.getMessage());
+        }
     }
 
     @Override
     @Transactional
     public StockSummaryDto initializeStock(StockUpdateDto initDto) {
         log.info("Initializing stock: {}", initDto);
-        
-        if (stockSummaryRepository.existsByBloodTypeAndHospitalId(initDto.getBloodType(), initDto.getHospitalId())) {
-            throw new IllegalStateException("Stock already initialized for this blood type and hospital");
+        try {
+            if (stockSummaryRepository.existsByBloodTypeAndCenterId(initDto.getBloodType(), initDto.getCenterId())) {
+                throw new IllegalStateException("Stock already initialized for this blood type and hospital");
+            }
+            
+            return updateStock(initDto);
+        } catch (IllegalStateException e) {
+            log.warn("Stock initialization failed: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error initializing stock: {}", e.getMessage(), e);
+            throw new RuntimeConflictException("Error initializing stock: " + e.getMessage());
         }
-        
-        return updateStock(initDto);
     }
 
     private StockSummaryEntity createNewStockEntry(StockUpdateDto dto) {
         return StockSummaryEntity.builder()
                 .bloodType(dto.getBloodType())
-                .hospitalId(dto.getHospitalId())
+                .centerId(dto.getCenterId())
                 .reorderThreshold(5) // Default threshold
                 .build();
     }

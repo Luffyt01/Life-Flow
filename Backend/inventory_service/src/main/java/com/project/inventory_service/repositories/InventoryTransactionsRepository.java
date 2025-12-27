@@ -47,7 +47,7 @@ public interface InventoryTransactionsRepository extends JpaRepository<Inventory
      * @param endDate   End date of the range
      * @return List of transactions within the specified date range
      */
-    @Query("SELECT t FROM InventoryTransactionsEntity t WHERE t.transactionDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT t FROM InventoryTransactionsEntity t WHERE t.createdAt BETWEEN :startDate AND :endDate")
     List<InventoryTransactionsEntity> findTransactionsBetweenDates(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate

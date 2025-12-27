@@ -20,6 +20,6 @@ spring:
         format_sql: true
 
 
-#jwt:
-#  secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
+jwt:
+  secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
 #  secretKey: ${JWT_SECRET_KEY}

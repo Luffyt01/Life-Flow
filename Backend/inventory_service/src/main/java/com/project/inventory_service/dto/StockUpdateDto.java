@@ -12,12 +12,14 @@ public class StockUpdateDto {
     @NotNull(message = "Blood type is required")
     private BloodType bloodType;
     
-
-    private UUID hospitalId;
+    private UUID centerId;
     
     @PositiveOrZero(message = "Quantity must be zero or positive")
     private int quantity;
     
     private boolean isReserved;
     private boolean isExpired;
+    
+    private Integer thresholdUnits;
+    private String notificationEmails;
 }

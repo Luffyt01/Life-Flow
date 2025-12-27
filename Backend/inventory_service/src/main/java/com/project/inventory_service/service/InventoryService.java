@@ -17,7 +17,7 @@ public interface InventoryService {
 
     void updateBag(UUID id, BagUpdateDto bloodBagDto);
 
-    List<BagResponseDto> searchBags(BloodType bloodType, StatusType statusType);
+    List<BagResponseDto> searchBags(UUID centerId,BloodType bloodType, StatusType statusType);
 
     void releaseBag(UUID id);
 

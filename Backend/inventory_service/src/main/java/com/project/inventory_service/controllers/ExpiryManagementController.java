@@ -7,10 +7,7 @@ import com.project.inventory_service.utils.JwtParser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +18,19 @@ import java.util.UUID;
 public class ExpiryManagementController {
     private final ExpiryManagementServiceImpl expiryManagementServiceImp;
     private final JwtParser jwtParser;
+
+    @GetMapping("/expiring-soon")
+    public ResponseEntity<List<ExpiryManagementTableResponseDto>> getExpiringSoon(
+            HttpServletRequest req, 
+            @RequestParam(defaultValue = "7") int daysThreshold,
+            @RequestParam(required = false) String bloodType,
+            @RequestParam(required = false) UUID centerId) {
+        
+//        UUID userId = jwtParser.getUserId(req);
+        // Assuming AlertLevel.WARNING or CRITICAL covers "expiring soon"
+        List<ExpiryManagementTableResponseDto> searchedData = expiryManagementServiceImp.getExpiryManagementDataByAlert(centerId, AlertLevel.WARNING);
+        return ResponseEntity.ok(searchedData);
+    }
 
     @GetMapping("/expiry-alert")
     public ResponseEntity<List<ExpiryManagementTableResponseDto>> getExpiryManagementDataByAlert(HttpServletRequest req, @RequestParam AlertLevel alertLevel) {
@@ -41,6 +51,28 @@ public class ExpiryManagementController {
         UUID hospitalId = jwtParser.getUserId(req);
         List<ExpiryManagementTableResponseDto> allData = expiryManagementServiceImp.getAllExpiryManagementTableData(hospitalId);
         return ResponseEntity.ok(allData);
+    }
+    
+    @GetMapping("/dashboard")
+    public ResponseEntity<Object> getInventoryDashboard(
+            @RequestParam(required = false) UUID centerId,
+            @RequestParam(required = false) String timePeriod) {
+        // GET /inventory/dashboard
+        // Input: center_id, time_period
+        // Output: stock_levels, utilization_rate, wastage_rate, fulfillment_rate, top_blood_types
+        return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/admin/reports")
+    public ResponseEntity<Object> getAdminReports() {
+        // GET /admin/inventory/reports
+        return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/admin/audit")
+    public ResponseEntity<Object> createAudit() {
+        // POST /admin/inventory/audit
+        return ResponseEntity.ok().build();
     }
 
 }

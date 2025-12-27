@@ -18,10 +18,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Service implementation for managing expiry-related operations of blood inventory.
- * Handles alert level management and expiry status updates.
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,13 +27,9 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
     private final ExpiryManagementRepository expiryManagementRepository;
     private final ModelMapper modelMapper;
 
-    /**
-     * Retrieves expiry management data filtered by alert level.
-     *
-     * @param alertLevel The alert level to filter by (NORMAL, WARNING, CRITICAL, EXPIRED)
-     * @return List of expiry management records matching the alert level
-     * @throws RuntimeConflictException if there's an error retrieving the data
-     */
+
+    @Override
+    @Transactional
     public List<ExpiryManagementTableResponseDto> getExpiryManagementDataByAlert(UUID userId, AlertLevel alertLevel) {
         log.info("Fetching expiry management data for alert level: {}", alertLevel);
 
@@ -70,12 +63,7 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
         }
     }
 
-    /**
-     * Updates the expiry status of all blood inventory items.
-     * This method recalculates days until expiry and updates alert levels accordingly.
-     *
-     * @throws RuntimeConflictException if there's an error during the update
-     */
+    @Override
     @Transactional
     public void UpdateEveryDayExpiryManagementTableJob() {
         log.info("Starting expiry status update job");
@@ -91,7 +79,9 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
     }
 
     @Override
+    @Transactional
     public List<ExpiryManagementTableResponseDto> getAllExpiryManagementTableData(UUID hospitalId) {
+        log.info("Fetching all expiry management data for hospital: {}", hospitalId);
         try{
             List<ExpiryManagementEntity> getData = expiryManagementRepository.findAllByHospitalId(hospitalId);
             return getData.stream()

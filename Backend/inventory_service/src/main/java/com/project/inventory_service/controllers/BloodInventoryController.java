@@ -16,49 +16,60 @@ import java.util.List;
 import java.util.UUID;
 
 
-@RequestMapping("/inventory/bags")
+@RequestMapping("/inventory")
 @RequiredArgsConstructor
 @RestController
 public class BloodInventoryController {
 
     private final InventoryServiceImpl inventoryService;
-    private final JwtParser jwtParser;
-    @PostMapping()
+//    private final JwtParser jwtParser;
+
+    @PostMapping("/blood-bag")
     public ResponseEntity<BloodBagDto> createBloodInventory(HttpServletRequest req, @RequestBody BloodBagDto bloodBagDto) {
-        UUID userId = jwtParser.getUserId(req);
-        bloodBagDto.setHospitalId(userId);
-        BloodBagDto bloodBagDto1 = inventoryService.createBloodInventory(bloodBagDto);
-        return new ResponseEntity<>(bloodBagDto1, HttpStatus.CREATED);
+        // Assuming collectionCenterId is passed in the DTO or derived from context if needed.
+        // here we gave the collectionCenterId and hospitalId is inside of collectionCenterTable
+        BloodBagDto createdBag = inventoryService.createBloodInventory(bloodBagDto);
+        return new ResponseEntity<>(createdBag, HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<BagResponseDto> getBagById(@PathVariable UUID id) {
-        BagResponseDto getBag = inventoryService.getBagById(id);
+    @GetMapping("/blood-bag/{bagId}")
+    public ResponseEntity<BagResponseDto> getBagById(@PathVariable UUID bagId) {
+        BagResponseDto getBag = inventoryService.getBagById(bagId);
         return ResponseEntity.ok(getBag);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<StringResponseDto> updateBag(@PathVariable UUID id, @RequestBody @Valid BagUpdateDto bagUpdateDto) {
-        inventoryService.updateBag(id, bagUpdateDto);
-        String message ="Bag is updated";
+    @PutMapping("/blood-bag/{bagId}/status")
+    public ResponseEntity<StringResponseDto> updateBagStatus(@PathVariable UUID bagId, @RequestBody @Valid BagUpdateDto bagUpdateDto) {
+        inventoryService.updateBag(bagId, bagUpdateDto);
+        String message ="Bag status updated";
         return new ResponseEntity<>(new StringResponseDto(message),HttpStatus.OK);
     }
 
 
     @GetMapping("/search")
-    public ResponseEntity<List<BagResponseDto>> searchBags(@RequestParam() BloodType bloodType, @RequestParam() StatusType statusType) {
-        List<BagResponseDto> bags = inventoryService.searchBags(bloodType, statusType);
+    public ResponseEntity<List<BagResponseDto>> searchBags(
+            @RequestParam(required = false) BloodType bloodType, 
+            @RequestParam(required = false) StatusType status,
+            @RequestParam(required = false) UUID centerId) {
+
+        List<BagResponseDto> bags = inventoryService.searchBags(centerId,bloodType, status);
         return ResponseEntity.ok(bags);
     }
+    
+    @GetMapping("/trace/{bagId}")
+    public ResponseEntity<BagResponseDto> traceBloodUnit(@PathVariable UUID bagId) {
+        BagResponseDto bag = inventoryService.getBagById(bagId);
+        return ResponseEntity.ok(bag);
+    }
 
-    @PutMapping("/{id}/release")
+    @PutMapping("/blood-bag/{id}/release")
     public ResponseEntity<StringResponseDto> releaseBag(@PathVariable UUID id) {
         inventoryService.releaseBag(id);
         String message ="Release blood with this id: "+id;
         return ResponseEntity.ok(new StringResponseDto(message));
     }
 
-    @PutMapping("/{id}/update/quality_check")
+    @PutMapping("/blood-bag/{id}/update/quality_check")
     public ResponseEntity<StringResponseDto> updateQualityCheck(@PathVariable UUID id, @RequestBody UpdateQualityDto qualityDto) {
        inventoryService.updateQuality(id, qualityDto);
         String message ="Quality check updated for id: "+id;
