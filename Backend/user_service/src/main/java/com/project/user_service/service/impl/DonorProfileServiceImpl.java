@@ -11,6 +11,9 @@ import com.project.user_service.service.DonorProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
 
     @Override
     @Transactional
+    @CachePut(value = "donorProfiles", key = "#userId")
     public DonorProfileResponseDto createDonorProfile(UUID userId, DonorProfileCreateDto createDto) {
         try {
             log.info("Creating donor profile for user ID: {}", userId);
@@ -38,7 +42,6 @@ public class DonorProfileServiceImpl implements DonorProfileService {
                         log.error("User not found with ID: {}", userId);
                         return new RuntimeException("User not found");
                     });
-            log.info("user", user);
 
             if (donorProfileRepository.existsById(userId)) {
                 log.warn("Donor profile already exists for user ID: {}", userId);
@@ -63,6 +66,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
     }
 
     @Override
+    @Cacheable(value = "donorProfiles", key = "#userId")
     public DonorProfileResponseDto getDonorProfile(UUID userId) {
         log.info("Fetching donor profile for user ID: {}", userId);
         DonorProfileEntity donorProfile = donorProfileRepository.findByUserId(userId)
@@ -75,6 +79,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
 
     @Override
     @Transactional
+    @CachePut(value = "donorProfiles", key = "#userId")
     public DonorProfileResponseDto updateDonorProfile(UUID userId, DonorProfileUpdateDto updateDto) {
         log.info("Updating donor profile for user ID: {}", userId);
         DonorProfileEntity donorProfile = donorProfileRepository.findByUserId(userId)
@@ -99,6 +104,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
 
     @Override
     @Transactional
+    @CachePut(value = "donorProfiles", key = "#userId")
     public DonorProfileResponseDto verifyDonor(UUID userId, DonorVerificationDto verificationDto) {
         log.info("Verifying donor profile for user ID: {}", userId);
         DonorProfileEntity donorProfile = donorProfileRepository.findByUserId(userId)
@@ -124,6 +130,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "donorProfiles", key = "#userId")
     public void deleteDonorProfile(UUID userId) {
         log.info("Deleting donor profile for user ID: {}", userId);
         if (!donorProfileRepository.existsById(userId)) {

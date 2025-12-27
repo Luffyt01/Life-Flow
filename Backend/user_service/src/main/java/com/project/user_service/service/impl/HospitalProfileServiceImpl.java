@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
 
     @Override
     @Transactional
+    @CachePut(value = "hospitalProfiles", key = "#userId")
     public HospitalProfileResponseDto createHospitalProfile(UUID userId, HospitalProfileCreateDto createDto) {
         log.info("Creating hospital profile for user ID: {}", userId);
         UserEntity user = userRepository.findById(userId)
@@ -58,6 +62,7 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
     }
 
     @Override
+    @Cacheable(value = "hospitalProfiles", key = "#userId")
     public HospitalProfileResponseDto getHospitalProfile(UUID userId) {
         log.info("Fetching hospital profile for user ID: {}", userId);
         HospitalProfileEntity hospitalProfile = hospitalProfileRepository.findByUserId(userId)
@@ -70,6 +75,7 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
 
     @Override
     @Transactional
+    @CachePut(value = "hospitalProfiles", key = "#userId")
     public HospitalProfileResponseDto updateHospitalProfile(UUID userId, HospitalProfileUpdateDto updateDto) {
         log.info("Updating hospital profile for user ID: {}", userId);
         HospitalProfileEntity hospitalProfile = hospitalProfileRepository.findByUserId(userId)
@@ -81,12 +87,6 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
         // Map non-null values
         modelMapper.map(updateDto, hospitalProfile);
 
-        // Handle Geometry Point update
-//        if (updateDto.getLatitude() != null && updateDto.getLongitude() != null) {
-//            Point location = GeometryUtil.createPoint(updateDto.getLatitude(), updateDto.getLongitude());
-//            hospitalProfile.setLocation(location);
-//        }
-
         HospitalProfileEntity updatedProfile = hospitalProfileRepository.save(hospitalProfile);
         log.info("Hospital profile updated successfully for user ID: {}", userId);
         return modelMapper.map(updatedProfile, HospitalProfileResponseDto.class);
@@ -94,6 +94,7 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "hospitalProfiles", key = "#userId")
     public void deleteHospitalProfile(UUID userId) {
         log.info("Deleting hospital profile for user ID: {}", userId);
         if (!hospitalProfileRepository.existsById(userId)) {
@@ -110,6 +111,7 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
     }
 
     @Override
+    @CacheEvict(value = "hospitalProfiles", key = "#hospitalId")
     public void verifyStatus(UUID hospitalId) {
         try {
             hospitalProfileRepository.updateVerifyStatusById(hospitalId);
