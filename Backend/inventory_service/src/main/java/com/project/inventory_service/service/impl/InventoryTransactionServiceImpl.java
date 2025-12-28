@@ -14,6 +14,8 @@ import com.project.inventory_service.service.InventoryTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     @Override
     @Transactional
+    @CacheEvict(value = "transactions", allEntries = true)
     public TransactionResponseDto createTransaction(TransactionRequestDto requestDto) {
         log.info("Creating transaction for bag ID: {}", requestDto.getBagId());
         try {
@@ -67,6 +70,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "transactions", key = "#transactionId")
     public TransactionResponseDto getTransactionById(UUID transactionId) {
         log.info("Fetching transaction with ID: {}", transactionId);
         try {
@@ -84,6 +88,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "transactions", key = "#bagId")
     public List<TransactionResponseDto> getTransactionsByBagId(UUID bagId) {
         log.info("Fetching transactions for bag ID: {}", bagId);
         try {
@@ -99,6 +104,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "transactions", key = "{#hospitalId, #transactionType}")
     public List<TransactionResponseDto> getTransactionsByType(UUID hospitalId,TransactionType transactionType) {
         log.info("Fetching transactions by type: {} for hospital: {}", transactionType, hospitalId);
         try {
@@ -123,6 +129,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "transactions", key = "#requestId")
     public List<TransactionResponseDto> getTransactionsByRequestId(UUID requestId) {
         log.info("Fetching transactions for request ID: {}", requestId);
         try {

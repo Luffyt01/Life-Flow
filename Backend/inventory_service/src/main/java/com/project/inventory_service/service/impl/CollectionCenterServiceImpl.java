@@ -9,6 +9,8 @@ import com.project.inventory_service.service.CollectionCenterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class CollectionCenterServiceImpl implements CollectionCenterService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "centers", allEntries = true)
     public CollectionCenterDto createCollectionCenter(CollectionCenterDto dto) {
         log.info("Creating new collection center: {}", dto.getName());
         try {
@@ -41,13 +44,14 @@ public class CollectionCenterServiceImpl implements CollectionCenterService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "centers", key = "#centerId")
     public CollectionCenterDto updateCollectionCenter(UUID centerId, CollectionCenterDto dto) {
         log.info("Updating collection center with ID: {}", centerId);
         try {
             CollectionCenterEntity existingEntity = collectionCenterRepository.findById(centerId)
                     .orElseThrow(() -> {
                         log.warn("Collection Center not found with ID: {}", centerId);
-                        return new ResourceNotFoundException("Collection Ceter not fnound");
+                        return new ResourceNotFoundException("Collection Center not found");
                     });
 
             existingEntity.setName(dto.getName());
@@ -76,6 +80,7 @@ public class CollectionCenterServiceImpl implements CollectionCenterService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "centers", key = "#centerId")
     public CollectionCenterDto getCollectionCenterById(UUID centerId) {
         log.info("Fetching collection center with ID: {}", centerId);
         try {
@@ -95,6 +100,7 @@ public class CollectionCenterServiceImpl implements CollectionCenterService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "centers", key = "'all'")
     public List<CollectionCenterDto> getAllCollectionCenters() {
         log.info("Fetching all collection centers");
         try {
@@ -109,6 +115,7 @@ public class CollectionCenterServiceImpl implements CollectionCenterService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "centers", key = "#hospitalId")
     public List<CollectionCenterDto> getCollectionCentersByHospitalId(UUID hospitalId) {
         log.info("Fetching collection centers for hospital ID: {}", hospitalId);
         try {
@@ -123,6 +130,7 @@ public class CollectionCenterServiceImpl implements CollectionCenterService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "centers", key = "#centerId")
     public void deleteCollectionCenter(UUID centerId) {
         log.info("Deleting collection center with ID: {}", centerId);
         try {

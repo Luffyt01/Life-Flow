@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -30,6 +32,7 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
 
     @Override
     @Transactional
+    @Cacheable(value = "expiry", key = "{#userId, #alertLevel}")
     public List<ExpiryManagementTableResponseDto> getExpiryManagementDataByAlert(UUID userId, AlertLevel alertLevel) {
         log.info("Fetching expiry management data for alert level: {}", alertLevel);
 
@@ -65,6 +68,7 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "expiry", allEntries = true)
     public void UpdateEveryDayExpiryManagementTableJob() {
         log.info("Starting expiry status update job");
 
@@ -80,6 +84,7 @@ public class ExpiryManagementServiceImpl implements ExpiryManagementService {
 
     @Override
     @Transactional
+    @Cacheable(value = "expiry", key = "#hospitalId")
     public List<ExpiryManagementTableResponseDto> getAllExpiryManagementTableData(UUID hospitalId) {
         log.info("Fetching all expiry management data for hospital: {}", hospitalId);
         try{

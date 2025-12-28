@@ -20,11 +20,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,6 +44,7 @@ public class InventoryServiceImpl implements InventoryService {
   
     @Override
     @Transactional
+    @CacheEvict(value = "bags", allEntries = true)
     public BloodBagDto createBloodInventory(BloodBagDto bloodBagDto) {
         log.info("Creating new blood inventory with data: {}", bloodBagDto);
 
@@ -82,6 +86,7 @@ public class InventoryServiceImpl implements InventoryService {
   
     @Override
     @Transactional()
+    @Cacheable(value = "bags", key = "#id")
     public BagResponseDto getBagById(UUID id) {
         log.info("Fetching blood bag with ID: {}", id);
 
@@ -105,6 +110,7 @@ public class InventoryServiceImpl implements InventoryService {
    
     @Override
     @Transactional
+    @CacheEvict(value = "bags", key = "#id")
     public void updateBag(UUID id, BagUpdateDto bloodBagDto) {
         log.info("Updating blood bag with ID: {}", id);
 
@@ -134,13 +140,16 @@ public class InventoryServiceImpl implements InventoryService {
     }
     @Override
     @Transactional()
+    @Cacheable(value = "bags", key = "{#centerId, #bloodType, #statusType}")
     public List<BagResponseDto> searchBags(UUID centerId,BloodType bloodType, StatusType statusType) {
         log.info("Searching for blood bags with type: {} and status: {}", bloodType, statusType);
 
         try {
             List<BloodInventoryEntity> results = bloodInventoryRepository.findByBloodTypeAndStatusType(centerId,bloodType, statusType);
             log.debug("Found {} matching blood bags", results.size());
-            return modelMapper.map(results, List.class);
+            return results.stream()
+                    .map(entity -> modelMapper.map(entity, BagResponseDto.class))
+                    .collect(Collectors.toList());
 
         } catch (Exception e) {
             log.error("Error searching blood bags: {}", e.getMessage(), e);
@@ -159,6 +168,7 @@ public class InventoryServiceImpl implements InventoryService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "bags", key = "#id")
     public void releaseBag(UUID id) {
         log.info("Releasing blood bag with ID: {}", id);
 
@@ -192,6 +202,7 @@ public class InventoryServiceImpl implements InventoryService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "bags", key = "#id")
     public void updateQuality(UUID id, UpdateQualityDto qualityDto) {
         log.info("Updating quality check for blood bag with ID: {}", id);
 

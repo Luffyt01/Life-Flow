@@ -11,6 +11,8 @@ import com.project.inventory_service.service.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "stock", key = "{#bloodType, #hospitalId}")
     public StockSummaryDto getStockSummary(BloodType bloodType, UUID hospitalId) {
         log.info("Fetching stock summary for blood type {} at hospital {}", bloodType, hospitalId);
         try {
@@ -47,6 +50,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "stock", key = "#hospitalId")
     public List<StockSummaryDto> getStockByHospital(UUID hospitalId) {
         log.info("Fetching all stock for hospital {}", hospitalId);
         try {
@@ -61,6 +65,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "stock", key = "#bloodType")
     public List<StockSummaryDto> getStockByBloodType(BloodType bloodType) {
         log.info("Fetching all stock for blood type {}", bloodType);
         try {
@@ -75,6 +80,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "stock", allEntries = true)
     public StockSummaryDto updateStock(StockUpdateDto updateDto) {
         log.info("Updating stock: {}", updateDto);
         try {
@@ -118,6 +124,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "stock", allEntries = true)
     public StockSummaryDto initializeStock(StockUpdateDto initDto) {
         log.info("Initializing stock: {}", initDto);
         try {
