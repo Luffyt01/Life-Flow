@@ -1,5 +1,6 @@
 package com.project.inventory_service.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,8 +22,13 @@ public class CollectionCenterDto {
     private BigDecimal longitude;
     private UUID hospitalId;
     private Integer capacityPerHour;
+    
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime operatingHoursStart;
+    
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime operatingHoursEnd;
+
     private Integer staffCount;
     private String contactNumber;
     private Boolean isActive;

@@ -25,7 +25,6 @@ public class BloodBagDto {
     @NotNull(message = "Blood type is required")
     private BloodType bloodType;
 
-    @NotNull(message = "Batch number is required")
     @NotEmpty(message = "Batch number is required")
     private String batchNumber;
 
@@ -36,7 +35,6 @@ public class BloodBagDto {
     @Future(message = "Expiry date must be in the future")
     private LocalDate expiryDate;
 
-    @NotNull(message = "Storage location is required")
     @NotEmpty(message = "Storage location is required")
     private String storageLocation;
 
@@ -48,7 +46,6 @@ public class BloodBagDto {
 
     private BigDecimal currentTemperature;
 
-    @NotNull(message = "Barcode is required")
     @NotEmpty(message = "Barcode is required")
     private String barcode;
 

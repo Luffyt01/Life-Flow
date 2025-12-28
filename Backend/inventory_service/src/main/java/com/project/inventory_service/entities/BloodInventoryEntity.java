@@ -71,6 +71,7 @@ public class BloodInventoryEntity {
     @Column(nullable = false)
     private UUID collectionCenterId;
 
+    @Enumerated(EnumType.STRING)
     private QualityCheckStatus qualityCheckStatus;
     private LocalDate qualityCheckDate;
     private String qualityCheckNotes;

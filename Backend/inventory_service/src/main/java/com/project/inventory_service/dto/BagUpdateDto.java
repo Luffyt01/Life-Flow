@@ -14,6 +14,5 @@ public class BagUpdateDto {
     @NotNull(message = "Status is required")
     private StatusType status;
     @NotNull(message = "Units available is required")
-    @NotNull(message = "Units available is required")
-    private Double unitsAvailable;
+    private Integer volumeMl;
 }

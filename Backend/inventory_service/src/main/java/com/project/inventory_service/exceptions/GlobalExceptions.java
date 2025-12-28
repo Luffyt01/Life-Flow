@@ -3,6 +3,7 @@ package com.project.inventory_service.exceptions;
 import com.project.inventory_service.exceptions.ExceptionTypes.ResourceNotFoundException;
 import com.project.inventory_service.exceptions.ExceptionTypes.RuntimeConflictException;
 import com.project.inventory_service.exceptions.ExceptionTypes.ErrorInSavingDataInDatabase;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -59,6 +60,19 @@ public class GlobalExceptions {
 //                .build();
 //        return buildApiErrorResponseEntity(error);
 //    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<?>> handleDataIntegrityViolationException(DataIntegrityViolationException ex){
+        String message = "Database error: " + ex.getMostSpecificCause().getMessage();
+        if (ex.getMessage().contains("duplicate key value")) {
+            message = "Duplicate entry detected. Please ensure unique values for unique fields.";
+        }
+        ApiError error = ApiError.builder()
+                .status(HttpStatus.CONFLICT)
+                .message(message)
+                .build();
+        return buildApiErrorResponseEntity(error);
+    }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

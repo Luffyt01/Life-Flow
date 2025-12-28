@@ -25,7 +25,7 @@ public class BloodInventoryController {
 //    private final JwtParser jwtParser;
 
     @PostMapping("/blood-bag")
-    public ResponseEntity<BloodBagDto> createBloodInventory(HttpServletRequest req, @RequestBody BloodBagDto bloodBagDto) {
+    public ResponseEntity<BloodBagDto> createBloodInventory(HttpServletRequest req, @RequestBody @Valid BloodBagDto bloodBagDto) {
         // Assuming collectionCenterId is passed in the DTO or derived from context if needed.
         // here we gave the collectionCenterId and hospitalId is inside of collectionCenterTable
         BloodBagDto createdBag = inventoryService.createBloodInventory(bloodBagDto);
@@ -70,7 +70,7 @@ public class BloodInventoryController {
     }
 
     @PutMapping("/blood-bag/{id}/update/quality_check")
-    public ResponseEntity<StringResponseDto> updateQualityCheck(@PathVariable UUID id, @RequestBody UpdateQualityDto qualityDto) {
+    public ResponseEntity<StringResponseDto> updateQualityCheck(@PathVariable UUID id, @RequestBody @Valid UpdateQualityDto qualityDto) {
        inventoryService.updateQuality(id, qualityDto);
         String message ="Quality check updated for id: "+id;
         return ResponseEntity.ok(new StringResponseDto(message));

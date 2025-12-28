@@ -21,8 +21,8 @@ public interface BloodInventoryRepository extends JpaRepository<BloodInventoryEn
 
     @Modifying
     @Transactional
-    @Query("UPDATE BloodInventoryEntity b SET b.status = :status, b.volumeMl = :unitsAvailable WHERE b.bagId = :id")
-    void updateBag(UUID id,  StatusType status,  Double unitsAvailable);
+    @Query("UPDATE BloodInventoryEntity b SET b.status = :status, b.volumeMl = :volumeMl WHERE b.bagId = :id")
+    void updateBag(UUID id,  StatusType status,  Integer volumeMl);
 
       @Query("SELECT b from BloodInventoryEntity b where b.bagId = :id")
     Optional<BloodInventoryEntity>  findByBagId(UUID id);

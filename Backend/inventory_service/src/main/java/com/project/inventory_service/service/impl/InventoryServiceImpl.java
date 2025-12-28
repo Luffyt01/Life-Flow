@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
@@ -77,6 +78,9 @@ public class InventoryServiceImpl implements InventoryService {
             log.info("Successfully created blood inventory with ID: {}", savedBloodInventory.getBagId());
             return modelMapper.map(savedBloodInventory, BloodBagDto.class);
 
+        } catch (DataIntegrityViolationException e) {
+            log.error("Duplicate key error: {}", e.getMessage());
+            throw new RuntimeConflictException("A blood bag with this barcode already exists.");
         } catch (Exception e) {
             log.error("Failed to create blood inventory: {}", e.getMessage(), e);
             throw new ErrorInSavingDataInDatabase("Failed to save blood inventory: " + e.getMessage());
@@ -125,7 +129,7 @@ public class InventoryServiceImpl implements InventoryService {
              bloodInventoryRepository.updateBag(
                     id,
                     bloodBagDto.getStatus(),
-                    bloodBagDto.getUnitsAvailable()
+                    bloodBagDto.getVolumeMl()
             );
 
             log.info("Successfully updated blood bag with ID: {}", id);

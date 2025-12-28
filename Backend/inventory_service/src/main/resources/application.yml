@@ -8,9 +8,9 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASS:}
+      host: ${REDIS_HOST:redis-13373.c212.ap-south-1-1.ec2.redns.redis-cloud.com}
+      port: ${REDIS_PORT:13373}
+      password: ${REDIS_PASS:Q7CT5spoOjGw6rq9CXeNgJ8FIzpgHizt}
 
 
   jpa:
