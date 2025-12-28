@@ -3,6 +3,7 @@ package com.project.Life_Flow.donor_service.services;
 import com.project.Life_Flow.donor_service.dto.*;
 import com.project.Life_Flow.donor_service.dto.enums.DayOfWeek;
 import com.project.Life_Flow.donor_service.entities.DonorAvailability;
+import com.project.Life_Flow.donor_service.exception.BadRequestException;
 import com.project.Life_Flow.donor_service.exception.ResourceNotFoundException;
 import com.project.Life_Flow.donor_service.repositories.DonorAvailabilityRepository;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,10 @@ public class DonorAvailabilityServiceImpl implements DonorAvailabilityService {
 
     @Override
     public UpdateAvailabilityResponseDto updateDonorAvailability(UUID donorId, DonorAvailabilityDto availabilityDto) {
+        if (availabilityDto.getDayOfWeek() == null) {
+            throw new BadRequestException("Day of week must be provided.");
+        }
+
         DonorAvailability donorAvailability = donorAvailabilityRepository.findByDonorId(donorId)
                 .orElse(new DonorAvailability());
 
@@ -46,7 +51,11 @@ public class DonorAvailabilityServiceImpl implements DonorAvailabilityService {
 
     @Override
     public List<DonorAvailabilityDto> getDonorAvailability(UUID donorId) {
-        return donorAvailabilityRepository.findAllByDonorId(donorId).stream()
+        List<DonorAvailability> availabilities = donorAvailabilityRepository.findAllByDonorId(donorId);
+        if (availabilities.isEmpty()) {
+            throw new ResourceNotFoundException("No availability found for donor with id: " + donorId);
+        }
+        return availabilities.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
@@ -77,6 +86,10 @@ public class DonorAvailabilityServiceImpl implements DonorAvailabilityService {
 
     @Override
     public BulkAvailabilityUpdateResponseDto bulkUpdateDonorAvailability(UUID donorId, BulkAvailabilityUpdateRequestDto requestDto) {
+        if (requestDto.getAvailability() == null || requestDto.getAvailability().isEmpty()) {
+            throw new BadRequestException("Availability list cannot be empty.");
+        }
+
         List<DonorAvailability> availabilities = requestDto.getAvailability().stream()
                 .map(dto -> {
                     DonorAvailability availability = new DonorAvailability();
@@ -115,11 +128,15 @@ public class DonorAvailabilityServiceImpl implements DonorAvailabilityService {
 
     @Override
     public void deleteDonorAvailability(UUID donorId, String day) {
-        DayOfWeek dayOfWeek = DayOfWeek.valueOf(day.toUpperCase());
-        List<DonorAvailability> availabilities = donorAvailabilityRepository.findAllByDonorId(donorId);
-        availabilities.stream()
-                .filter(a -> a.getDayOfWeek() == dayOfWeek.ordinal())
-                .forEach(donorAvailabilityRepository::delete);
+        try {
+            DayOfWeek dayOfWeek = DayOfWeek.valueOf(day.toUpperCase());
+            List<DonorAvailability> availabilities = donorAvailabilityRepository.findAllByDonorId(donorId);
+            availabilities.stream()
+                    .filter(a -> a.getDayOfWeek() == dayOfWeek.ordinal())
+                    .forEach(donorAvailabilityRepository::delete);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid day of the week: " + day);
+        }
     }
 
     private DonorAvailabilityDto mapToDto(DonorAvailability availability) {

@@ -3,6 +3,7 @@ package com.project.Life_Flow.donor_service.services;
 import com.project.Life_Flow.donor_service.dto.*;
 import com.project.Life_Flow.donor_service.entities.DonationHistory;
 import com.project.Life_Flow.donor_service.entities.enums.DonationStatus;
+import com.project.Life_Flow.donor_service.exception.BadRequestException;
 import com.project.Life_Flow.donor_service.exception.ResourceNotFoundException;
 import com.project.Life_Flow.donor_service.repositories.DonationHistoryRepository;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +49,10 @@ public class DonationHistoryServiceImpl implements DonationHistoryService {
 
     @Override
     public RecordDonationResponseDto recordDonation(RecordDonationRequestDto requestDto) {
+        if (requestDto.getDonorId() == null || requestDto.getAppointmentSlotId() == null || requestDto.getBloodType() == null || requestDto.getUnits() == null) {
+            throw new BadRequestException("Missing required fields for recording a donation.");
+        }
+
         DonationHistory donationHistory = new DonationHistory();
         donationHistory.setDonorId(requestDto.getDonorId());
         donationHistory.setAppointmentSlotId(requestDto.getAppointmentSlotId());
@@ -127,7 +132,7 @@ public class DonationHistoryServiceImpl implements DonationHistoryService {
                 .units(donationHistory.getUnitsCollected())
                 .healthScore(donationHistory.getHealthScore())
                 .centerName("Unknown") // Placeholder
-                .status(DonationStatus.SUCCESSFUL) // Placeholder
+                .status(DonationStatus.COMPLETED) // Placeholder
                 .build();
     }
 }

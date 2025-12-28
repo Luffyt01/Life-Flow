@@ -3,6 +3,7 @@ package com.project.Life_Flow.donor_service.services;
 import com.project.Life_Flow.donor_service.dto.*;
 import com.project.Life_Flow.donor_service.entities.Gamification;
 import com.project.Life_Flow.donor_service.entities.enums.BadgeLevel;
+import com.project.Life_Flow.donor_service.exception.BadRequestException;
 import com.project.Life_Flow.donor_service.exception.ResourceNotFoundException;
 import com.project.Life_Flow.donor_service.repositories.GamificationRepository;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,10 @@ public class GamificationServiceImpl implements GamificationService {
 
     @Override
     public AddPointsResponseDto addPoints(UUID donorId, AddPointsRequestDto requestDto) {
+        if (requestDto.getPoints() == null || requestDto.getPoints() <= 0) {
+            throw new BadRequestException("Points must be a positive integer.");
+        }
+
         Gamification gamification = gamificationRepository.findByDonorId(donorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Gamification profile not found for donor with id: " + donorId));
 
@@ -106,6 +111,10 @@ public class GamificationServiceImpl implements GamificationService {
 
     @Override
     public AwardAchievementResponseDto awardAchievement(UUID donorId, AwardAchievementRequestDto requestDto) {
+        if (requestDto.getAchievementName() == null || requestDto.getAchievementName().isEmpty()) {
+            throw new BadRequestException("Achievement name must be provided.");
+        }
+
         Gamification gamification = gamificationRepository.findByDonorId(donorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Gamification profile not found for donor with id: " + donorId));
 
@@ -154,6 +163,9 @@ public class GamificationServiceImpl implements GamificationService {
 
     @Override
     public UseReferralResponseDto useReferral(UseReferralRequestDto requestDto) {
+        if (requestDto.getReferralCode() == null || requestDto.getReferralCode().isEmpty()) {
+            throw new BadRequestException("Referral code must be provided.");
+        }
         // Business logic to use a referral code
         return UseReferralResponseDto.builder()
                 .pointsAwarded(50) // Placeholder
