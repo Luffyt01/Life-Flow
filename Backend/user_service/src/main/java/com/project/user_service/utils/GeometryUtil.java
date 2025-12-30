@@ -3,10 +3,8 @@ package com.project.user_service.utils;
 import com.project.user_service.dto.PointDTO;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
-
-
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 public class GeometryUtil {
 

@@ -2,9 +2,7 @@ package com.project.user_service.dto;
 
 import com.project.user_service.entities.enums.UserRole;
 import jakarta.validation.constraints.*;
-
 import lombok.*;
-import java.util.Set;
 
 @Data
 @Getter

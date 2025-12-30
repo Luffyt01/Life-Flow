@@ -1,5 +1,6 @@
 package com.project.user_service.service.impl;
 
+import com.project.user_service.dto.PointDTO;
 import com.project.user_service.dto.hospital.HospitalProfileCreateDto;
 import com.project.user_service.dto.hospital.HospitalProfileResponseDto;
 import com.project.user_service.dto.hospital.HospitalProfileUpdateDto;
@@ -8,7 +9,6 @@ import com.project.user_service.entities.UserEntity;
 import com.project.user_service.repositories.HospitalProfileRepository;
 import com.project.user_service.repositories.UserRepository;
 import com.project.user_service.service.HospitalProfileService;
-import com.project.user_service.utils.GeometryUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
@@ -135,8 +135,11 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
 
     @Override
     public List<HospitalProfileResponseDto> findNearbyHospitals(Double latitude, Double longitude, Double radiusKm) {
+        double[] coordinates ={latitude,longitude};
+       PointDTO newPoint = new PointDTO(coordinates);
+         Point pointLocation =  modelMapper.map(newPoint,Point.class);
         log.info("Finding nearby hospitals at lat: {}, lon: {}, radius: {}km", latitude, longitude, radiusKm);
-        List<HospitalProfileEntity> nearbyHospitals = hospitalProfileRepository.findNearbyHospitals(latitude, longitude, radiusKm);
+        List<HospitalProfileEntity> nearbyHospitals = hospitalProfileRepository.findNearbyHospitals(pointLocation, radiusKm);
         return nearbyHospitals.stream()
                 .map(entity -> modelMapper.map(entity, HospitalProfileResponseDto.class))
                 .collect(Collectors.toList());

@@ -1,7 +1,6 @@
 package com.project.user_service.dto.donor;
 
 import com.project.user_service.dto.PointDTO;
-import com.project.user_service.entities.enums.Gender;
 import com.project.user_service.entities.enums.VaccinationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,8 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -20,6 +17,8 @@ import java.util.UUID;
 public class DonorProfileUpdateDto {
     private BigDecimal weightKg;
     private Integer heightCm;
+    private String address;
+
     private String medicalConditions;
     private String medications;
     private String allergies;

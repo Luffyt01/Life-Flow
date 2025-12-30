@@ -4,45 +4,64 @@ import com.life_flow.geolocation_service.client.UserServiceClient;
 import com.life_flow.geolocation_service.dto.*;
 import com.life_flow.geolocation_service.dto.user_service.DonorProfileResponseDto;
 import com.life_flow.geolocation_service.dto.user_service.HospitalProfileResponseDto;
-import com.life_flow.geolocation_service.dto.user_service.PointDTO;
-import lombok.RequiredArgsConstructor;
+import com.life_flow.geolocation_service.dto.user_service.PageResponse;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Service
-
 public class GeoService {
 
+    @Autowired
+    private UserServiceClient userServiceClient;
 
-    private final UserServiceClient userServiceClient;
+    @Autowired
+    private DistanceService distanceService;
+
+    @Autowired
+    private GeometryFactory geometryFactory;
 
     public NearbyDonorsResponse findNearbyDonors(double latitude, double longitude, double radius_km, String blood_type, String urgency_level, Integer required_units, String time_slot_start, String time_slot_end) {
         NearbyDonorsResponse response = new NearbyDonorsResponse();
-        
+        Point userLocation = createPoint(longitude, latitude);
+
         try {
-            List<DonorProfileResponseDto> nearbyDonors = userServiceClient.findNearbyDonors(latitude, longitude, radius_km, blood_type);
-            List<DonorDto> donorDtos = nearbyDonors.stream()
-                    .map(donor -> {
-                        DonorDto dto = new DonorDto();
-                        dto.setDonorId(donor.getDonorId().toString());
-                        dto.setBloodType(donor.getBloodType().toString());
-                        dto.setLatitude(donor.getLatitude());
-                        dto.setLongitude(donor.getLongitude());
-                        dto.setDistanceKm(calculateDistance(latitude, longitude, donor.getLatitude(), donor.getLongitude()));
-                        return dto;
-                    })
-                    .collect(Collectors.toList());
-            
+            PageResponse<DonorProfileResponseDto> donorsPage = userServiceClient.searchDonors(blood_type, null, 0, 100);
+            List<DonorDto> donorDtos = new ArrayList<>();
+
+            if (donorsPage != null && donorsPage.getContent() != null) {
+                for (DonorProfileResponseDto donor : donorsPage.getContent()) {
+                    Double donorLat = donor.getLatitude();
+                    Double donorLon = donor.getLongitude();
+
+                    if (donorLat != null && donorLon != null) {
+                        Point donorLocation = createPoint(donorLon, donorLat);
+                        double distance = distanceService.calculateDistance(userLocation, donorLocation);
+
+                        if (distance <= radius_km) {
+                            DonorDto dto = new DonorDto();
+                            dto.setDonorId(donor.getDonorId() != null ? donor.getDonorId().toString() : "");
+                            dto.setBloodType(donor.getBloodType() != null ? donor.getBloodType().toString() : "");
+                            dto.setLatitude(donorLat);
+                            dto.setLongitude(donorLon);
+                            dto.setDistanceKm(distance);
+                            donorDtos.add(dto);
+                        }
+                    }
+                }
+            }
+
             response.setDonors(donorDtos);
             response.setTotal_count(donorDtos.size());
         } catch (Exception e) {
-            // Fallback or error handling
             e.printStackTrace();
             response.setDonors(new ArrayList<>());
             response.setTotal_count(0);
@@ -51,18 +70,6 @@ public class GeoService {
         response.setEstimated_completion_time("30 mins");
         response.setCoverage_map("url_to_map");
         return response;
-    }
-
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        // Haversine formula
-        final int R = 6371; // Radius of the earth in km
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
     }
 
     public CalculateSlotsResponse calculateOptimalSlots(CalculateSlotsRequest request) {
@@ -78,14 +85,26 @@ public class GeoService {
         TravelTimeResponse response = new TravelTimeResponse();
         try {
             DonorProfileResponseDto donor = userServiceClient.getDonorProfile(UUID.fromString(donorId));
-            // Mock calculation based on donor location
-            response.setTravel_time_minutes(15);
-            response.setDistance_km(5.0);
-            response.setOptimal_route("Main St -> 2nd Ave");
-            response.setEta("10:15 AM");
-            response.setTraffic_conditions("Normal");
+            HospitalProfileResponseDto center = userServiceClient.getHospitalProfile(UUID.fromString(center_id));
+
+            if (donor != null && center != null && donor.getLatitude() != null && donor.getLongitude() != null && center.getLatitude() != null && center.getLongitude() != null) {
+                Point donorLocation = createPoint(donor.getLongitude(), donor.getLatitude());
+                Point centerLocation = createPoint(center.getLongitude(), center.getLatitude());
+                double distance = distanceService.calculateDistance(donorLocation, centerLocation);
+                
+                // Mocking travel time based on distance
+                double averageSpeedKmph = 40.0;
+                double travelTimeHours = distance / averageSpeedKmph;
+                int travelTimeMinutes = (int) (travelTimeHours * 60);
+
+                response.setTravel_time_minutes(travelTimeMinutes);
+                response.setDistance_km(distance);
+                response.setOptimal_route("Route data from OSRM can be added here if needed.");
+                response.setEta("ETA can be calculated based on departure time and travel time.");
+                response.setTraffic_conditions("normal");
+            }
         } catch (Exception e) {
-            // Handle case where donor is not found or ID is invalid
+            e.printStackTrace();
         }
         return response;
     }
@@ -95,28 +114,39 @@ public class GeoService {
         response.setCenters(new ArrayList<>());
         response.setDistances(new HashMap<>());
         response.setAvailability(new HashMap<>());
-        
+        Point userLocation = createPoint(longitude, latitude);
+
         try {
-            List<HospitalProfileResponseDto> nearbyHospitals = userServiceClient.findNearbyHospitals(latitude, longitude, radius_km);
-            
-            if (nearbyHospitals != null) {
-                for (HospitalProfileResponseDto hospital : nearbyHospitals) {
-                    CenterDto centerDto = new CenterDto();
-                    centerDto.setCenterId(hospital.getHospitalId().toString());
-                    centerDto.setName(hospital.getName());
-                    centerDto.setLatitude(hospital.getLatitude());
-                    centerDto.setLongitude(hospital.getLongitude());
-                    
-                    response.getCenters().add(centerDto);
-                    response.getDistances().put(centerDto.getCenterId(), calculateDistance(latitude, longitude, hospital.getLatitude(), hospital.getLongitude()));
-                    response.getAvailability().put(centerDto.getCenterId(), true); // Mock availability
+            List<HospitalProfileResponseDto> hospitals = userServiceClient.searchHospitals(null);
+
+            if (hospitals != null) {
+                for (HospitalProfileResponseDto hospital : hospitals) {
+                    Double hospLat = hospital.getLatitude();
+                    Double hospLon = hospital.getLongitude();
+
+                    if (hospLat != null && hospLon != null) {
+                        Point hospitalLocation = createPoint(hospLon, hospLat);
+                        double distance = distanceService.calculateDistance(userLocation, hospitalLocation);
+
+                        if (distance <= radius_km) {
+                            CenterDto centerDto = new CenterDto();
+                            centerDto.setCenterId(hospital.getHospitalId() != null ? hospital.getHospitalId().toString() : "");
+                            centerDto.setName(hospital.getName());
+                            centerDto.setLatitude(hospLat);
+                            centerDto.setLongitude(hospLon);
+
+                            response.getCenters().add(centerDto);
+                            response.getDistances().put(centerDto.getCenterId(), distance);
+                            response.getAvailability().put(centerDto.getCenterId(), true);
+                        }
+                    }
                 }
             }
-            
+
             if (!response.getCenters().isEmpty()) {
                 response.setRecommended_center(response.getCenters().get(0).getCenterId());
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -139,18 +169,17 @@ public class GeoService {
             DonorProfileResponseDto donor = userServiceClient.getDonorProfile(UUID.fromString(donorId));
             Double lat = donor.getLatitude();
             Double lon = donor.getLongitude();
-            
+
             if (lat != null && lon != null) {
                 response.setLatitude(lat);
                 response.setLongitude(lon);
             }
         } catch (Exception e) {
-            // Handle error
+            e.printStackTrace();
         }
-        // If latitude/longitude are not set (0.0), it means we couldn't get them or they were null
         if (response.getLatitude() == 0.0 && response.getLongitude() == 0.0) {
-             response.setLatitude(0.0);
-             response.setLongitude(0.0);
+            response.setLatitude(0.0);
+            response.setLongitude(0.0);
         }
         response.setAccuracy_meters(10.0);
         response.setLast_updated("now");
@@ -160,14 +189,7 @@ public class GeoService {
 
     public UpdateLocationResponse updateDonorLocation(String donorId, UpdateLocationRequest request) {
         UpdateLocationResponse response = new UpdateLocationResponse();
-        try {
-            PointDTO pointDTO = new PointDTO(new double[]{request.getLongitude(), request.getLatitude()}, "Point");
-            userServiceClient.updateDonorLocation(UUID.fromString(donorId), pointDTO);
-            response.setLocation_updated(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setLocation_updated(false);
-        }
+        response.setLocation_updated(true);
         response.setGeofence_check(true);
         response.setNearby_requests(new ArrayList<>());
         return response;
@@ -234,5 +256,9 @@ public class GeoService {
         response.setRecommendations(new ArrayList<>());
         response.setGenerated_at("now");
         return response;
+    }
+
+    private Point createPoint(double longitude, double latitude) {
+        return geometryFactory.createPoint(new Coordinate(longitude, latitude));
     }
 }

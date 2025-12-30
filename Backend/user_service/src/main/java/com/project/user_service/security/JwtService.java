@@ -2,7 +2,6 @@ package com.project.user_service.security;
 
 import com.project.user_service.entities.UserEntity;
 import io.jsonwebtoken.Claims;
-import java.nio.charset.StandardCharsets;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 @Slf4j

@@ -1,6 +1,7 @@
 package com.project.user_service.repositories;
 
 import com.project.user_service.entities.HospitalProfileEntity;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,10 +30,9 @@ public interface HospitalProfileRepository extends JpaRepository<HospitalProfile
     @Query("SELECT h FROM HospitalProfileEntity h WHERE (:city IS NULL OR h.address LIKE %:city%)")
     List<HospitalProfileEntity> findByCity(@Param("city") String city);
 
-    @Query(value = "SELECT * FROM hospital_profiles h WHERE ST_DWithin(h.location, ST_MakePoint(:longitude, :latitude), :radiusKm * 1000)", nativeQuery = true)
+    @Query(value = "SELECT * FROM hospital_profiles h WHERE ST_DWithin(h.location, ST_MakePoint(:pointLocation.coordinates[0], :pointLocation.coordinates[1]), :radiusKm * 1000)", nativeQuery = true)
     List<HospitalProfileEntity> findNearbyHospitals(
-            @Param("latitude") Double latitude,
-            @Param("longitude") Double longitude,
+            Point pointLocation,
             @Param("radiusKm") Double radiusKm
     );
 }

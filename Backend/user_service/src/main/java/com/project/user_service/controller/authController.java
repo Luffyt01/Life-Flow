@@ -205,7 +205,7 @@ public class authController {
 
     @GetMapping("/get-me")
     public ResponseEntity<UserDto> getUser(HttpServletRequest req) {
-        UserDto user = userService.getUser(req);
+        UserDto user = authService.getUser(req);
         return new ResponseEntity<>(user, HttpStatus.OK);
 
     }

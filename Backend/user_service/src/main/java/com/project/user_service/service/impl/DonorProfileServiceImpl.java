@@ -12,7 +12,7 @@ import com.project.user_service.repositories.UserRepository;
 import com.project.user_service.service.DonorProfileService;
 import com.project.user_service.utils.GeometryUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
@@ -129,7 +129,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
             donorProfile.setEligibilityStatus(EligibilityStatus.NOT_ELIGIBLE);
         }
 
-        DonorProfileEntity savedProfile = donorProfileRepository.save(savedProfile);
+        DonorProfileEntity savedProfile = donorProfileRepository.save(donorProfile);
         log.info("Donor profile verification updated for user ID: {}", userId);
         return modelMapper.map(savedProfile, DonorProfileResponseDto.class);
     }
@@ -177,7 +177,10 @@ public class DonorProfileServiceImpl implements DonorProfileService {
     @Override
     public List<DonorProfileResponseDto> findNearbyDonors(Double latitude, Double longitude, Double radiusKm, BloodType bloodType) {
         log.info("Finding nearby donors with blood type: {}", bloodType);
-        List<DonorProfileEntity> nearbyDonors = donorProfileRepository.findNearbyDonors(latitude, longitude, radiusKm);
+        double[] coordinates ={latitude,longitude};
+        PointDTO newPoint = new PointDTO(coordinates);
+        Point pointLocation =  modelMapper.map(newPoint,Point.class);
+        List<DonorProfileEntity> nearbyDonors = donorProfileRepository.findNearbyDonors(pointLocation, radiusKm);
         return nearbyDonors.stream()
                 .filter(donor -> bloodType == null || donor.getBloodType().equals(bloodType))
                 .map(entity -> modelMapper.map(entity, DonorProfileResponseDto.class))

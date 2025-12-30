@@ -1,6 +1,7 @@
 package com.project.user_service.service.impl;
 
 import com.project.user_service.dto.LogInDto;
+import com.project.user_service.dto.UserDto;
 import com.project.user_service.entities.UserEntity;
 import com.project.user_service.exception.ExceptionType.AuthenticationException;
 import com.project.user_service.exception.ExceptionType.InvalidTokenException;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
     private final SessionService sessionService;
 
 
@@ -124,5 +127,24 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public UserDto getUser(HttpServletRequest req) {
+        String authorizedToken = req.getHeader("Authorization");
 
+        if (authorizedToken == null || !authorizedToken.startsWith("Bearer ")) {
+            throw new AuthenticationException("User not authenticate");
+        }
+        String token = authorizedToken.split("Bearer ")[1];
+
+        String id = jwtService.getUserIdFromToken(token);
+
+        UserEntity user = userRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> {
+                    logger.error("User not found with ID: {}", id);
+                    return new ResourceNotFoundException("User not found with id: " + id);
+                });;
+
+        return modelMapper.map(user, UserDto.class);
+
+    }
 }

@@ -1,23 +1,15 @@
 package com.project.user_service.entities;
 
-import com.project.user_service.entities.enums.BloodType;
-import com.project.user_service.entities.enums.EligibilityStatus;
-import com.project.user_service.entities.enums.Gender;
-import com.project.user_service.entities.enums.VaccinationStatus;
-import com.project.user_service.entities.enums.VerificationStatus;
+import com.project.user_service.entities.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Point;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -43,6 +35,8 @@ public class DonorProfileEntity {
     @MapsId
     @JoinColumn(name = "donor_id")
     private UserEntity user;
+
+    private String address;
 
     @Column(nullable = false, length = 5)
     private BloodType bloodType;

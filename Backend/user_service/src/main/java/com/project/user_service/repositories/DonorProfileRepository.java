@@ -3,6 +3,7 @@ package com.project.user_service.repositories;
 import com.project.user_service.entities.DonorProfileEntity;
 import com.project.user_service.entities.enums.BloodType;
 import com.project.user_service.entities.enums.EligibilityStatus;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,7 +26,7 @@ public interface DonorProfileRepository extends JpaRepository<DonorProfileEntity
            "WHERE (:bloodType IS NULL OR d.bloodType = :bloodType) " +
            "AND (:eligibilityStatus IS NULL OR d.eligibilityStatus = :eligibilityStatus) " +
            "AND (:minWeight IS NULL OR d.weightKg >= :minWeight) " +
-           "AND (:city IS NULL OR d.user.address LIKE %:city%)")
+           "AND (:city IS NULL OR d.address LIKE %:city%)")
     Page<DonorProfileEntity> searchDonors(
             @Param("bloodType") BloodType bloodType,
             @Param("eligibilityStatus") EligibilityStatus eligibilityStatus,
@@ -34,10 +35,9 @@ public interface DonorProfileRepository extends JpaRepository<DonorProfileEntity
             Pageable pageable
     );
 
-    @Query(value = "SELECT * FROM donor_profiles d WHERE ST_DWithin(d.location, ST_MakePoint(:longitude, :latitude), :radiusKm * 1000)", nativeQuery = true)
+    @Query(value = "SELECT * FROM donor_profiles d WHERE ST_DWithin(d.location, :location, :radiusKm * 1000)", nativeQuery = true)
     List<DonorProfileEntity> findNearbyDonors(
-            @Param("latitude") Double latitude,
-            @Param("longitude") Double longitude,
+           Point location,
             @Param("radiusKm") Double radiusKm
     );
 }

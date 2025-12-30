@@ -4,51 +4,102 @@ import com.life_flow.geolocation_service.dto.user_service.DonorProfileResponseDt
 import com.life_flow.geolocation_service.dto.user_service.HospitalProfileResponseDto;
 import com.life_flow.geolocation_service.dto.user_service.PageResponse;
 import com.life_flow.geolocation_service.dto.user_service.PointDTO;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "user-service", url = "${user-service.url}")
-public interface UserServiceClient {
+@Service
+public class UserServiceClient {
 
-    @GetMapping("/profile/donors/{userId}")
-    DonorProfileResponseDto getDonorProfile(@PathVariable("userId") UUID userId);
+    private final RestClient restClient;
 
-    @GetMapping("/profile/hospitals/{userId}")
-    HospitalProfileResponseDto getHospitalProfile(@PathVariable("userId") UUID userId);
+    public UserServiceClient(RestClient.Builder builder, @Value("${user-service.url}") String baseUrl) {
+        this.restClient = builder.baseUrl(baseUrl).build();
+    }
 
-    @GetMapping("/profile/donors/search")
-    PageResponse<DonorProfileResponseDto> searchDonors(
-            @RequestParam(required = false) String bloodType,
-            @RequestParam(required = false) String city,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int limit
-    );
+    public DonorProfileResponseDto getDonorProfile(UUID userId) {
+        return restClient.get()
+                .uri("/profile/donors/{userId}", userId)
+                .retrieve()
+                .body(DonorProfileResponseDto.class);
+    }
 
-    @GetMapping("/profile/hospitals/search")
-    List<HospitalProfileResponseDto> searchHospitals(@RequestParam(required = false) String city);
+    public HospitalProfileResponseDto getHospitalProfile(UUID userId) {
+        return restClient.get()
+                .uri("/profile/hospitals/{userId}", userId)
+                .retrieve()
+                .body(HospitalProfileResponseDto.class);
+    }
 
-    @PutMapping("/profile/donors/{userId}/location")
-    void updateDonorLocation(@PathVariable("userId") UUID userId, @RequestBody PointDTO locationDto);
+    public PageResponse<DonorProfileResponseDto> searchDonors(String bloodType, String city, int page, int limit) {
+        return restClient.get()
+                .uri(uriBuilder -> {
+                    UriBuilder builder = uriBuilder.path("/profile/donors/search");
+                    if (bloodType != null) {
+                        builder.queryParam("bloodType", bloodType);
+                    }
+                    if (city != null) {
+                        builder.queryParam("city", city);
+                    }
+                    return builder.queryParam("page", page)
+                            .queryParam("limit", limit)
+                            .build();
+                })
+                .retrieve()
+                .body(new ParameterizedTypeReference<PageResponse<DonorProfileResponseDto>>() {});
+    }
 
-    @GetMapping("/profile/donors/nearby")
-    List<DonorProfileResponseDto> findNearbyDonors(
-            @RequestParam("latitude") Double latitude,
-            @RequestParam("longitude") Double longitude,
-            @RequestParam("radiusKm") Double radiusKm,
-            @RequestParam(value = "bloodType", required = false) String bloodType
-    );
+    public List<HospitalProfileResponseDto> searchHospitals(String city) {
+        return restClient.get()
+                .uri(uriBuilder -> {
+                    UriBuilder builder = uriBuilder.path("/profile/hospitals/search");
+                    if (city != null) {
+                        builder.queryParam("city", city);
+                    }
+                    return builder.build();
+                })
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<HospitalProfileResponseDto>>() {});
+    }
 
-    @GetMapping("/profile/hospitals/nearby")
-    List<HospitalProfileResponseDto> findNearbyHospitals(
-            @RequestParam("latitude") Double latitude,
-            @RequestParam("longitude") Double longitude,
-            @RequestParam("radiusKm") Double radiusKm
-    );
+    public void updateDonorLocation(UUID userId, PointDTO locationDto) {
+        restClient.put()
+                .uri("/profile/donors/{userId}/location", userId)
+                .body(locationDto)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public List<DonorProfileResponseDto> findNearbyDonors(Double latitude, Double longitude, Double radiusKm, String bloodType) {
+        return restClient.get()
+                .uri(uriBuilder -> {
+                    UriBuilder builder = uriBuilder.path("/profile/donors/nearby")
+                            .queryParam("latitude", latitude)
+                            .queryParam("longitude", longitude)
+                            .queryParam("radiusKm", radiusKm);
+                    if (bloodType != null) {
+                        builder.queryParam("bloodType", bloodType);
+                    }
+                    return builder.build();
+                })
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<DonorProfileResponseDto>>() {});
+    }
+
+    public List<HospitalProfileResponseDto> findNearbyHospitals(Double latitude, Double longitude, Double radiusKm) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/profile/hospitals/nearby")
+                        .queryParam("latitude", latitude)
+                        .queryParam("longitude", longitude)
+                        .queryParam("radiusKm", radiusKm)
+                        .build())
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<HospitalProfileResponseDto>>() {});
+    }
 }

@@ -1,12 +1,10 @@
 package com.project.user_service.service;
 
 import com.project.user_service.dto.LogInDto;
-import com.project.user_service.entities.UserEntity;
+import com.project.user_service.dto.UserDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 
 public interface AuthService {
@@ -15,4 +13,6 @@ public interface AuthService {
 
     @Transactional
     void logout(HttpServletRequest request, HttpServletResponse response);
+
+    UserDto getUser(HttpServletRequest req);
 }
