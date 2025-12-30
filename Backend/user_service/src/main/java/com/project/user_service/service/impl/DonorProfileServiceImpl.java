@@ -1,15 +1,19 @@
 package com.project.user_service.service.impl;
 
+import com.project.user_service.dto.PointDTO;
 import com.project.user_service.dto.donor.*;
 import com.project.user_service.entities.DonorProfileEntity;
 import com.project.user_service.entities.UserEntity;
+import com.project.user_service.entities.enums.BloodType;
 import com.project.user_service.entities.enums.EligibilityStatus;
 import com.project.user_service.entities.enums.VerificationStatus;
 import com.project.user_service.repositories.DonorProfileRepository;
 import com.project.user_service.repositories.UserRepository;
 import com.project.user_service.service.DonorProfileService;
+import com.project.user_service.utils.GeometryUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j;
+import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -20,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -123,7 +129,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
             donorProfile.setEligibilityStatus(EligibilityStatus.NOT_ELIGIBLE);
         }
 
-        DonorProfileEntity savedProfile = donorProfileRepository.save(donorProfile);
+        DonorProfileEntity savedProfile = donorProfileRepository.save(savedProfile);
         log.info("Donor profile verification updated for user ID: {}", userId);
         return modelMapper.map(savedProfile, DonorProfileResponseDto.class);
     }
@@ -148,8 +154,33 @@ public class DonorProfileServiceImpl implements DonorProfileService {
                 criteria.getBloodType(),
                 criteria.getEligibilityStatus(),
                 criteria.getMinWeight(),
+                criteria.getCity(),
                 pageable
         );
         return donorPage.map(entity -> modelMapper.map(entity, DonorProfileResponseDto.class));
+    }
+
+    @Override
+    @Transactional
+    @CachePut(value = "donorProfiles", key = "#userId")
+    public void updateDonorLocation(UUID userId, PointDTO locationDto) {
+        log.info("Updating location for donor ID: {}", userId);
+        DonorProfileEntity donorProfile = donorProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Donor profile not found"));
+
+        Point point = GeometryUtil.createPoint(locationDto);
+        donorProfile.setLocation(point);
+        donorProfileRepository.save(donorProfile);
+        log.info("Successfully updated location for donor ID: {}", userId);
+    }
+
+    @Override
+    public List<DonorProfileResponseDto> findNearbyDonors(Double latitude, Double longitude, Double radiusKm, BloodType bloodType) {
+        log.info("Finding nearby donors with blood type: {}", bloodType);
+        List<DonorProfileEntity> nearbyDonors = donorProfileRepository.findNearbyDonors(latitude, longitude, radiusKm);
+        return nearbyDonors.stream()
+                .filter(donor -> bloodType == null || donor.getBloodType().equals(bloodType))
+                .map(entity -> modelMapper.map(entity, DonorProfileResponseDto.class))
+                .collect(Collectors.toList());
     }
 }

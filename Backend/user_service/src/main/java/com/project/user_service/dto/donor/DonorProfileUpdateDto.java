@@ -1,5 +1,6 @@
 package com.project.user_service.dto.donor;
 
+import com.project.user_service.dto.PointDTO;
 import com.project.user_service.entities.enums.Gender;
 import com.project.user_service.entities.enums.VaccinationStatus;
 import lombok.AllArgsConstructor;
@@ -27,4 +28,5 @@ public class DonorProfileUpdateDto {
     private VaccinationStatus vaccinationStatus;
 //    private UUID preferredCenterId;
     private LocalDate lastDonationDate;
+    private PointDTO location;
 }

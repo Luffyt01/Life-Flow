@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,4 +24,15 @@ public interface HospitalProfileRepository extends JpaRepository<HospitalProfile
 
     @Query("SELECT h.isVerified FROM HospitalProfileEntity h WHERE h.hospitalId = :hospitalId")
     boolean isVerified(@Param("hospitalId") UUID hospitalId);
+
+    // Add search method for geolocation service
+    @Query("SELECT h FROM HospitalProfileEntity h WHERE (:city IS NULL OR h.address LIKE %:city%)")
+    List<HospitalProfileEntity> findByCity(@Param("city") String city);
+
+    @Query(value = "SELECT * FROM hospital_profiles h WHERE ST_DWithin(h.location, ST_MakePoint(:longitude, :latitude), :radiusKm * 1000)", nativeQuery = true)
+    List<HospitalProfileEntity> findNearbyHospitals(
+            @Param("latitude") Double latitude,
+            @Param("longitude") Double longitude,
+            @Param("radiusKm") Double radiusKm
+    );
 }

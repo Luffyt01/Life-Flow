@@ -19,7 +19,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -120,5 +122,23 @@ public class HospitalProfileServiceImpl implements HospitalProfileService {
             throw new RuntimeException("error in verifying status");
         }
 
+    }
+
+    @Override
+    public List<HospitalProfileResponseDto> searchHospitals(String city) {
+        log.info("Searching hospitals in city: {}", city);
+        List<HospitalProfileEntity> hospitals = hospitalProfileRepository.findByCity(city);
+        return hospitals.stream()
+                .map(entity -> modelMapper.map(entity, HospitalProfileResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<HospitalProfileResponseDto> findNearbyHospitals(Double latitude, Double longitude, Double radiusKm) {
+        log.info("Finding nearby hospitals at lat: {}, lon: {}, radius: {}km", latitude, longitude, radiusKm);
+        List<HospitalProfileEntity> nearbyHospitals = hospitalProfileRepository.findNearbyHospitals(latitude, longitude, radiusKm);
+        return nearbyHospitals.stream()
+                .map(entity -> modelMapper.map(entity, HospitalProfileResponseDto.class))
+                .collect(Collectors.toList());
     }
 }

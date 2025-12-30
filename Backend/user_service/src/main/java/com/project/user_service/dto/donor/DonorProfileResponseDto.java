@@ -1,5 +1,6 @@
 package com.project.user_service.dto.donor;
 
+import com.project.user_service.dto.PointDTO;
 import com.project.user_service.entities.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +42,7 @@ public class DonorProfileResponseDto {
     private LocalDateTime verifiedAt;
     private LocalDateTime lastEligibilityCheck;
     private Integer totalDonations;
+    private PointDTO location;
     private LocalDateTime createdAt;
     private LocalDateTime lastUpdated;
 }

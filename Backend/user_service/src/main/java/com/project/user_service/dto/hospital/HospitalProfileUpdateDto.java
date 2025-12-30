@@ -1,5 +1,6 @@
 package com.project.user_service.dto.hospital;
 
+import com.project.user_service.dto.PointDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +17,5 @@ public class HospitalProfileUpdateDto {
     private String description;
     private String website;
 //    private String documentDriveUrl;
+    private PointDTO location;
 }

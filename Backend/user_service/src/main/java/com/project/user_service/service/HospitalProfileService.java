@@ -4,6 +4,7 @@ import com.project.user_service.dto.hospital.HospitalProfileCreateDto;
 import com.project.user_service.dto.hospital.HospitalProfileResponseDto;
 import com.project.user_service.dto.hospital.HospitalProfileUpdateDto;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface HospitalProfileService {
@@ -15,4 +16,8 @@ public interface HospitalProfileService {
     void verifyStatus(UUID hospitalId);
 
     boolean getVerifyStatus(UUID hospitalId);
+    
+    List<HospitalProfileResponseDto> searchHospitals(String city);
+
+    List<HospitalProfileResponseDto> findNearbyHospitals(Double latitude, Double longitude, Double radiusKm);
 }

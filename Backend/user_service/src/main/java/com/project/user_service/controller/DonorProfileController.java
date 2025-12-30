@@ -1,5 +1,6 @@
 package com.project.user_service.controller;
 
+import com.project.user_service.dto.PointDTO;
 import com.project.user_service.dto.donor.*;
 import com.project.user_service.entities.UserEntity;
 import com.project.user_service.entities.enums.BloodType;
@@ -19,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -86,6 +88,22 @@ public class DonorProfileController {
 
         Pageable pageable = PageRequest.of(page, limit);
         return ResponseEntity.ok(donorProfileService.searchDonors(criteria, pageable));
+    }
+
+    @PutMapping("/{userId}/location")
+    public ResponseEntity<Void> updateDonorLocation(@PathVariable UUID userId, @RequestBody PointDTO locationDto) {
+        donorProfileService.updateDonorLocation(userId, locationDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/nearby")
+    public ResponseEntity<List<DonorProfileResponseDto>> findNearbyDonors(
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam Double radiusKm,
+            @RequestParam(required = false) BloodType bloodType
+    ) {
+        return ResponseEntity.ok(donorProfileService.findNearbyDonors(latitude, longitude, radiusKm, bloodType));
     }
 
 

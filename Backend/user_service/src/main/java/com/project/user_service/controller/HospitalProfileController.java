@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -67,6 +68,20 @@ public class HospitalProfileController {
         UUID hospitalId = getUserIdFromAuthentication();
     boolean isVerified = hospitalProfileService.getVerifyStatus(hospitalId);
     return new ResponseEntity<>(HospitalStatusDto.builder().isVerified(isVerified).build(),HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<HospitalProfileResponseDto>> searchHospitals(@RequestParam(required = false) String city) {
+        return ResponseEntity.ok(hospitalProfileService.searchHospitals(city));
+    }
+
+    @GetMapping("/nearby")
+    public ResponseEntity<List<HospitalProfileResponseDto>> findNearbyHospitals(
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam Double radiusKm
+    ) {
+        return ResponseEntity.ok(hospitalProfileService.findNearbyHospitals(latitude, longitude, radiusKm));
     }
 
     public UUID getUserIdFromAuthentication() {

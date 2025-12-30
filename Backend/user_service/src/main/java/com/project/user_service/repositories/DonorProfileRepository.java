@@ -24,15 +24,20 @@ public interface DonorProfileRepository extends JpaRepository<DonorProfileEntity
     @Query("SELECT d FROM DonorProfileEntity d " +
            "WHERE (:bloodType IS NULL OR d.bloodType = :bloodType) " +
            "AND (:eligibilityStatus IS NULL OR d.eligibilityStatus = :eligibilityStatus) " +
-           "AND (:minWeight IS NULL OR d.weightKg >= :minWeight)")
+           "AND (:minWeight IS NULL OR d.weightKg >= :minWeight) " +
+           "AND (:city IS NULL OR d.user.address LIKE %:city%)")
     Page<DonorProfileEntity> searchDonors(
             @Param("bloodType") BloodType bloodType,
             @Param("eligibilityStatus") EligibilityStatus eligibilityStatus,
             @Param("minWeight") BigDecimal minWeight,
+            @Param("city") String city,
             Pageable pageable
     );
-    
-    // Note: 'city' search is complex without a direct city column. 
-    // If you have a city column in UserEntity, you would join:
-    // "AND (:city IS NULL OR d.user.address LIKE %:city%)" (assuming address contains city)
+
+    @Query(value = "SELECT * FROM donor_profiles d WHERE ST_DWithin(d.location, ST_MakePoint(:longitude, :latitude), :radiusKm * 1000)", nativeQuery = true)
+    List<DonorProfileEntity> findNearbyDonors(
+            @Param("latitude") Double latitude,
+            @Param("longitude") Double longitude,
+            @Param("radiusKm") Double radiusKm
+    );
 }
