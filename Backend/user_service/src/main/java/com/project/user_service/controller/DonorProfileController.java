@@ -104,6 +104,15 @@ public class DonorProfileController {
     ) {
         return ResponseEntity.ok(donorProfileService.findNearbyDonors(latitude, longitude, radiusKm, bloodType));
     }
+    @GetMapping("/nearby-less-data")
+    public ResponseEntity<List<DonorProfileResponseLessDto>> findNearbyDonorsWithLessResponseData(
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam Double radiusKm,
+            @RequestParam(required = false) BloodType bloodType
+    ) {
+        return ResponseEntity.ok(donorProfileService.findNearbyDonorsWithLessResp(latitude, longitude, radiusKm, bloodType));
+    }
 
 
     public UUID getUserIdFromAuthentication() {

@@ -18,4 +18,6 @@ public interface DonorProfileService {
     Page<DonorProfileResponseDto> searchDonors(DonorSearchCriteriaDto criteria, Pageable pageable);
     void updateDonorLocation(UUID userId, PointDTO locationDto);
     List<DonorProfileResponseDto> findNearbyDonors(Double latitude, Double longitude, Double radiusKm, BloodType bloodType);
+
+    List<DonorProfileResponseLessDto> findNearbyDonorsWithLessResp(Double latitude, Double longitude, Double radiusKm, BloodType bloodType);
 }

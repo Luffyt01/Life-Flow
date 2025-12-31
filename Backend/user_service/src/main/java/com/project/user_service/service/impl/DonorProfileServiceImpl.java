@@ -36,6 +36,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
     private final DonorProfileRepository donorProfileRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final GeometryUtil geometryUtil;
 
     @Override
     @Transactional
@@ -53,6 +54,7 @@ public class DonorProfileServiceImpl implements DonorProfileService {
                 log.warn("Donor profile already exists for user ID: {}", userId);
                 throw new RuntimeException("Donor profile already exists");
             }
+            log.info("location",createDto.getLocation());
 
             DonorProfileEntity donorProfile = modelMapper.map(createDto, DonorProfileEntity.class);
             donorProfile.setUser(user);
@@ -179,11 +181,37 @@ public class DonorProfileServiceImpl implements DonorProfileService {
         log.info("Finding nearby donors with blood type: {}", bloodType);
         double[] coordinates ={latitude,longitude};
         PointDTO newPoint = new PointDTO(coordinates);
+        log.info(newPoint.toString());
         Point pointLocation =  modelMapper.map(newPoint,Point.class);
+
         List<DonorProfileEntity> nearbyDonors = donorProfileRepository.findNearbyDonors(pointLocation, radiusKm);
         return nearbyDonors.stream()
                 .filter(donor -> bloodType == null || donor.getBloodType().equals(bloodType))
                 .map(entity -> modelMapper.map(entity, DonorProfileResponseDto.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DonorProfileResponseLessDto> findNearbyDonorsWithLessResp(Double latitude, Double longitude, Double radiusKm, BloodType bloodType) {
+        log.info("Finding nearby donors with blood type: {} , {}", bloodType,radiusKm);
+        double[] coordinates = {latitude, longitude};
+        PointDTO newPoint = new PointDTO(coordinates);
+        Point pointLocation = modelMapper.map(newPoint, Point.class);
+
+        log.info(newPoint.toString());
+        log.info(pointLocation.toString());
+
+        // Convert BloodType enum to string explicitly
+        String bloodTypeString = (bloodType != null) ? bloodType.name() : null;
+
+        List<DonorProfileEntity> nearbyDonors = donorProfileRepository
+                .findNearbyDonorsLessResponse(pointLocation, radiusKm, bloodTypeString);
+
+        log.info("size {} ", nearbyDonors.size());
+        return nearbyDonors.stream()
+                .filter(donor -> bloodType == null || donor.getBloodType().equals(bloodType))
+                .map(entity -> modelMapper.map(entity, DonorProfileResponseLessDto.class))
+                .collect(Collectors.toList());
+
     }
 }

@@ -40,4 +40,14 @@ public interface DonorProfileRepository extends JpaRepository<DonorProfileEntity
            Point location,
             @Param("radiusKm") Double radiusKm
     );
+
+
+    @Query(value = "SELECT * FROM donor_profiles d " +
+            "WHERE ST_DWithin(d.location, :pointLocation, :radiusKm * 1000) " +
+            "AND d.blood_type = :bloodTypeString",
+            nativeQuery = true)
+    List<DonorProfileEntity> findNearbyDonorsLessResponse(
+            @Param("pointLocation") Point pointLocation,
+            @Param("radiusKm") Double radiusKm,
+            @Param("bloodTypeString") String bloodTypeString);
 }

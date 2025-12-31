@@ -4,16 +4,22 @@ import com.life_flow.geolocation_service.dto.user_service.DonorProfileResponseDt
 import com.life_flow.geolocation_service.dto.user_service.HospitalProfileResponseDto;
 import com.life_flow.geolocation_service.dto.user_service.PageResponse;
 import com.life_flow.geolocation_service.dto.user_service.PointDTO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
+
 public class UserServiceClient {
 
     private final RestClient restClient;
@@ -75,21 +81,48 @@ public class UserServiceClient {
                 .toBodilessEntity();
     }
 
-    public List<DonorProfileResponseDto> findNearbyDonors(Double latitude, Double longitude, Double radiusKm, String bloodType) {
-        return restClient.get()
-                .uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/profile/donors/nearby")
-                            .queryParam("latitude", latitude)
-                            .queryParam("longitude", longitude)
-                            .queryParam("radiusKm", radiusKm);
-                    if (bloodType != null) {
-                        builder.queryParam("bloodType", bloodType);
-                    }
-                    return builder.build();
-                })
-                .retrieve()
-                .body(new ParameterizedTypeReference<List<DonorProfileResponseDto>>() {});
-    }
+//    public List<DonorProfileResponseDto> findNearbyDonors(Double latitude, Double longitude, Double radiusKm, String bloodType) {
+//        ResponseEntity<List<DonorProfileResponseDto>> response = restClient.get()
+//                .uri(uriBuilder -> {
+//                    UriBuilder builder = uriBuilder.path("/profile/donors/nearby-less-data")
+//                            .queryParam("latitude", latitude)
+//                            .queryParam("longitude", longitude)
+//                            .queryParam("radiusKm", radiusKm);
+//                    if (bloodType != null) {
+//                        builder.queryParam("bloodType", bloodType);
+//                    }
+//                    return builder.build();
+//                })
+//                .retrieve()
+//                .toEntity(new ParameterizedTypeReference<>() {
+//                });
+//   log.info("fnjdfb");
+//        return response.getBody();
+//    }
+public List<DonorProfileResponseDto> findNearbyDonors(Double latitude, Double longitude, Double radiusKm, String bloodType) {
+    ApiResponseWrapper<List<DonorProfileResponseDto>> response = restClient.get()
+            .uri(uriBuilder -> {
+                UriBuilder builder = uriBuilder.path("/profile/donors/nearby")
+                        .queryParam("latitude", latitude)
+                        .queryParam("longitude", longitude)
+                        .queryParam("radiusKm", radiusKm);
+                if (bloodType != null) {
+                    builder.queryParam("bloodType", bloodType);
+                }
+                return builder.build();
+            })
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
+    log.info("fnjdfb");
+
+    return response != null && response.getData() != null ? response.getData() : new ArrayList<>();
+}
+
+
+
+
+
+
 
     public List<HospitalProfileResponseDto> findNearbyHospitals(Double latitude, Double longitude, Double radiusKm) {
         return restClient.get()

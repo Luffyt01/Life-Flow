@@ -18,6 +18,7 @@ public class MapperConfig  {
            ModelMapper mapper =  new ModelMapper();
 
            mapper.typeMap(PointDTO.class, Point.class).setConverter(context -> {
+               log.debug("Converting PointDTO to Point: {}", context.getSource());
                PointDTO pointDTO = context.getSource();
                log.debug("Converting PointDTO to Point: {}", pointDTO);
                if (pointDTO == null || pointDTO.getCoordinates() == null) {

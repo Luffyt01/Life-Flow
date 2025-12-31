@@ -5,7 +5,9 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.stereotype.Service;
 
+@Service
 public class GeometryUtil {
 
     // Converting PointDTO to Point

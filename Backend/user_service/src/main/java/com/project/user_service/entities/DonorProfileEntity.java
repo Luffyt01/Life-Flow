@@ -38,7 +38,8 @@ public class DonorProfileEntity {
 
     private String address;
 
-    @Column(nullable = false, length = 5)
+
+    @Enumerated(EnumType.STRING)
     private BloodType bloodType;
 
     private LocalDate dateOfBirth;
@@ -47,20 +48,17 @@ public class DonorProfileEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(precision = 5, scale = 2)
     private BigDecimal weightKg;
 
     private Integer heightCm;
 
-    @Column(precision = 5, scale = 2)
     private BigDecimal bmi;
 
-    @Column(precision = 4, scale = 1)
     private BigDecimal hemoglobinLevel;
 
     private LocalDate lastDonationDate;
 
-    @Column(length = 20)
+
     @Enumerated(EnumType.STRING)
     private EligibilityStatus eligibilityStatus;
 

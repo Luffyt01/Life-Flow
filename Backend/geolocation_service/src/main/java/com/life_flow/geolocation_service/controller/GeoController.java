@@ -23,12 +23,12 @@ public class GeoController {
             @RequestParam double latitude,
             @RequestParam double longitude,
             @RequestParam double radius_km,
-            @RequestParam(required = false) String blood_type,
+            @RequestParam String bloodType,
             @RequestParam(required = false) String urgency_level,
             @RequestParam(required = false) Integer required_units,
             @RequestParam(required = false) String time_slot_start,
             @RequestParam(required = false) String time_slot_end) {
-        return ResponseEntity.ok(geoService.findNearbyDonors(latitude, longitude, radius_km, blood_type, urgency_level, required_units, time_slot_start, time_slot_end));
+        return ResponseEntity.ok(geoService.findNearbyDonors(latitude, longitude, radius_km, bloodType, urgency_level, required_units, time_slot_start, time_slot_end));
     }
 
     @PostMapping("/appointments/calculate-slots")
