@@ -33,7 +33,7 @@ build/
 .vscode/
 
 # Application configuration
-#application.yml
+application-dev.yml
 application.properties
 src/main/resources/application*.{properties}
 
