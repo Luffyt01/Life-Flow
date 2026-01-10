@@ -7,8 +7,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="geolocation_service" />
+        <module name="api-gateway" />
         <module name="user_service" />
+        <module name="geolocation_service" />
+        <module name="discovery-service" />
       </profile>
       <profile name="Annotation profile for inventory_service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
