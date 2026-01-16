@@ -1,0 +1,37 @@
+spring:
+  application:
+     name: api-gateway
+
+# api gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - stripPrefix=2
+
+        - id: geolocation-service
+          uri: lb://geolocation-service
+          predicates:
+            - Path=/api/v1/geolocations/**
+          filters:
+            - stripPrefix=2
+
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/v1/inventory/**
+          filters:
+            - stripPrefix=2
+
+
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
