@@ -31,3 +31,16 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Application configuration
+application.properties
+
+# Ignore development configuration containing secrets
+/src/main/resources/application-dev.yml
+
+# Environment specific files
+*.env
+.env.local
+.env
+
+.env.*.local

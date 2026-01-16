@@ -1,20 +1,23 @@
 package com.project.user_service.service;
 
-import com.project.user_service.dto.LogInDto;
+
 import com.project.user_service.dto.SignupDto;
-import com.project.user_service.dto.UserDto;
+import com.project.user_service.dto.passwordUpdateAfterGoogleLoginDto;
 import com.project.user_service.entities.UserEntity;
+import jakarta.validation.Valid;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService  {
 
-    String[] logInRequest(LogInDto logInDto);
-     UserDto signUpRequest(SignupDto signupDto);
-     UserEntity getUserById(Long id);
 
-    UserEntity loadUserByUsername(String userEmail);
-
-
-    String refreshToken(String refreshToken);
-
+     void signUpRequest(SignupDto signupDto);
+    void verifyUser(String token, String email);
+    UserEntity getUserByEmail(String userEmail);
+    UserEntity getUserById(String userId);
+    UserDetails loadUserByUsername(String userEmail);
     UserEntity save(UserEntity newUser);
+
+
+    void passwordUpdateAfterGoogleLogin(@Valid passwordUpdateAfterGoogleLoginDto passwordUpdateAfterGoogleLoginDto);
+
 }
