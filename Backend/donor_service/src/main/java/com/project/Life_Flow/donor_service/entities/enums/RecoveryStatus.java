@@ -1,8 +1,0 @@
-package com.project.Life_Flow.donor_service.entities.enums;
-
-public enum RecoveryStatus {
-    NORMAL,
-    SLOW,
-    FAST,
-    COMPLICATED
-}
