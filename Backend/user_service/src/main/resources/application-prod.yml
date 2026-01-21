@@ -1,7 +1,7 @@
 spring:
   application:
     name: user_service
-  
+
   security:
     oauth2:
       client:

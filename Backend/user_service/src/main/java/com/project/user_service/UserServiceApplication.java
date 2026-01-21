@@ -10,7 +10,7 @@ public class UserServiceApplication {
 
 	public static void main(String[] args) {
 
-		System.out.println("Hello from TestOut");
+		System.out.println("Hello from TestOut1");
 		SpringApplication.run(UserServiceApplication.class, args);
 	}
 }

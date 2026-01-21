@@ -1,6 +1,6 @@
 package com.project.Life_Flow.donor_service.dto;
 
-import com.project.Life_Flow.donor_service.entities.DonationHistory;
+import com.project.Life_Flow.donor_service.entities.enums.AdverseEvents;
 import com.project.Life_Flow.donor_service.entities.enums.RecoveryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +16,6 @@ import java.util.List;
 public class UpdateDonationRecordDto {
     private Integer healthScore;
     private String staffNotes;
-    private List<DonationHistory.Complication> complications;
+    private List<AdverseEvents> adverseEvents;
     private RecoveryStatus recoveryStatus;
 }

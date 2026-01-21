@@ -9,6 +9,8 @@
         <option value="$PROJECT_DIR$/geolocation_service/pom.xml" />
         <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/discovery-service/pom.xml" />
+        <option value="$PROJECT_DIR$/donor_service/pom.xml" />
+        <option value="$PROJECT_DIR$/request_service/pom.xml" />
       </list>
     </option>
   </component>
