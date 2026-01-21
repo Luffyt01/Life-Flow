@@ -11,15 +11,15 @@
         <module name="user_service" />
         <module name="discovery-service" />
       </profile>
-      <profile name="Annotation profile for request_service" enabled="true">
+      <profile name="Annotation profile for api-gateway" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
         </processorPath>
-        <module name="inventory_service" />
         <module name="api-gateway" />
+        <module name="inventory_service" />
         <module name="donor_service" />
         <module name="request_service" />
       </profile>
