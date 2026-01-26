@@ -1,26 +1,31 @@
 spring:
   application:
-    name: user_service
+    name: request_service
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            scope: openid,profile,email
+  # Logging
+  logging:
+    level:
+      com.project.user_service: DEBUG
+      org.springframework: INFO
+      org.hibernate: INFO
+    pattern:
+      console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
 
+  # Redis
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASS:}
+      password: ${REDIS_PASS:Q7CT5spoOjGw6rq9CXeNgJ8FIzpgHizt}
 
+  # Datasource
   datasource:
     url: jdbc:postgresql://localhost:5432/Life_flow
     username: postgres
     password: rocky
     driver-class-name: org.postgresql.Driver
 
+  # JPA
   jpa:
     defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -32,54 +37,35 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: rockysheoran72@gmail.com
-    password: bebj fono wcrm acwx
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          connectiontimeout: 10000
-          timeout: 10000
-          writetimeout: 10000
-          ssl:
-            trust: "*"
+  # Springdoc
+  doc:
+    swagger-ui:
+      path: /swagger-ui.html
+    api-docs:
+      path: /v3/api-docs
 
-springdoc:
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-  api-docs:
-    path: /v3/api-docs
-    enabled: true
-
+# JWT
 jwt:
   secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
 
-frontend:
-  url: http://localhost:3000
-backend:
-  url: http://localhost:9020/users
-
+# Deployment
 deploy:
   env: development
 
+# Management
 management:
   endpoints:
     web:
       exposure:
         include: health,info
 
+# Server
 server:
-  port: 9020
+  port: 9040
   servlet:
-    context-path: /users
+    context-path: /request
 
+# Eureka
 eureka:
   client:
     service-url:

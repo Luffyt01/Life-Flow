@@ -1,0 +1,117 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+#        user-service
+        - id: user-service-api-docs
+          uri: lb://user-service
+          predicates:
+            - Path=/users/v3/**
+
+        - id: user-service-swagger
+          uri: lb://user-service
+          predicates:
+            - Path=/users/swagger-ui/**
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - StripPrefix=2
+
+
+#          Geolocation
+        - id: geolocation-service-api-docs
+          uri: lb://geolocation-service
+          predicates:
+            - Path=/geolocations/v3/**
+
+        - id: geolocation-service-swagger
+          uri: lb://geolocation-service
+          predicates:
+            - Path=/geolocations/swagger-ui/**
+
+        - id: geolocation-service
+          uri: lb://geolocation-service
+          predicates:
+            - Path=/api/v1/geolocations/**
+          filters:
+            - StripPrefix=2
+
+#          Inventory-service
+        - id: inventory-service-api-docs
+          uri: lb://inventory-service
+          predicates:
+            - Path=/inventory/v3/**
+
+        - id: inventory-service-swagger
+          uri: lb://inventory-service
+          predicates:
+            - Path=/inventory/swagger-ui/**
+
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/v1/inventory/**
+          filters:
+            - StripPrefix=2
+
+
+#         donor-service
+        - id: donor-service-api-docs
+          uri: lb://donor-service
+          predicates:
+            - Path=/donors/v3/**
+
+        - id: donor-service-swagger
+          uri: lb://donor-service
+          predicates:
+            - Path=/donor/swagger-ui/**
+
+        - id: donor-service
+          uri: lb://donor-service
+          predicates:
+            - Path=/api/v1/donor/**
+          filters:
+              - StripPrefix=2
+
+#        request-service
+
+        - id: request-service-api-docs
+          uri: lb://request-service
+          predicates:
+            - Path=/request/v3/**
+
+        - id: request-service-swagger
+          uri: lb://request-service
+          predicates:
+            - Path=/request/swagger-ui/**
+
+        - id: request-service
+          uri: lb://request-service
+          predicates:
+            - Path=/api/v1/request/**
+          filters:
+            - StripPrefix=2
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: false
+  api-docs:
+    path: /v3/api-docs
+    enabled: false
+
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway
