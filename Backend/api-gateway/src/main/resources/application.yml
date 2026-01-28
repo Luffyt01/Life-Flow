@@ -9,8 +9,8 @@ spring:
           enable: true
           lower-case-service-id: true
 
-  profiles:
-    active: dev
+#  profiles:
+#    active: dev
 
   server:
     port: 8080
