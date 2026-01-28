@@ -24,3 +24,5 @@ management:
       exposure:
         include: health,info
 
+
+user:endpoint: http://localhost:9020/users
