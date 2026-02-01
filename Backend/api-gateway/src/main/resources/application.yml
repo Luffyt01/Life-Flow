@@ -6,11 +6,17 @@ spring:
     gateway:
       discovery:
         locator:
-          enable: true
+          enable: false
           lower-case-service-id: true
+          url-expression: "'http://'+serviceId.toLowerCase()"
 
-#  profiles:
-#    active: dev
+
+    loadbalancer:
+      eureka:
+        enabled: true # Explicitly enable Eureka for the LoadBalancer
+
+  profiles:
+    active: dev
 
   server:
     port: 8080
@@ -22,7 +28,29 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    enabled: true
+    register-with-eureka: true
+    healthcheck:
+      enabled: true
+
+  instance:
+    instance-id: api-gateway:8080
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE  # ← Change to TRACE for debugging
+    org.springframework.cloud.loadbalancer: DEBUG
+    com.netflix.discovery: DEBUG
 
 user:endpoint: http://localhost:9020/users

@@ -51,7 +51,7 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             "u.status = :status, " +
             "u.role = :userRole " +
             "WHERE u.email = :email")
-    void exitingUserUpdate(String email, List<AuthProviderType> providerType, Status status, UserRole userRole);
+    void exitingUserUpdate(@Param("email") String email, @Param("providerType") List<AuthProviderType> providerType, @Param("status") Status status, @Param("userRole") UserRole userRole);
 
     @Modifying
     @Transactional
@@ -73,5 +73,5 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             "u.password = :password, " +
             "u.provider =:providers " +
             "WHERE u.id = :id")
-    void updatePasswordAfterOauth2(UUID id, @Nullable String encode, List<AuthProviderType> providers);
+    void updatePasswordAfterOauth2(@Param("id") UUID id, @Param("password") @Nullable String password, @Param("providers") List<AuthProviderType> providers);
 }
