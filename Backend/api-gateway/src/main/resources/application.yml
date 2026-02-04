@@ -6,12 +6,13 @@ spring:
     gateway:
       discovery:
         locator:
-          enable: false
+          enable: true
           lower-case-service-id: true
           url-expression: "'http://'+serviceId.toLowerCase()"
 
 
     loadbalancer:
+      configurations: health-check
       eureka:
         enabled: true # Explicitly enable Eureka for the LoadBalancer
 

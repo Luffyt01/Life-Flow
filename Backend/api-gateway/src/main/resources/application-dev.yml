@@ -23,17 +23,17 @@ spring:
 
 #          Geolocation
         - id: geolocation-service-api-docs
-          uri: lb://geolocation-service
+          uri: lb://GEOLOCATION-SERVICE
           predicates:
             - Path=/geolocations/v3/**
 
         - id: geolocation-service-swagger
-          uri: lb://geolocation-service
+          uri: lb://GEOLOCATION-SERVICE
           predicates:
             - Path=/geolocations/swagger-ui/**
 
         - id: geolocation-service
-          uri: lb://geolocation-service
+          uri: lb://GEOLOCATION-SERVICE
           predicates:
             - Path=/api/v1/geolocations/**
           filters:
@@ -41,17 +41,17 @@ spring:
 
 #          Inventory-service
         - id: inventory-service-api-docs
-          uri: lb://inventory-service
+          uri: lb://INVENTORY-SERVICE
           predicates:
             - Path=/inventory/v3/**
 
         - id: inventory-service-swagger
-          uri: lb://inventory-service
+          uri: lb://INVENTORY-SERVICE
           predicates:
             - Path=/inventory/swagger-ui/**
 
         - id: inventory-service
-          uri: lb://inventory-service
+          uri: lb://INVENTORY-SERVICE
           predicates:
             - Path=/api/v1/inventory/**
           filters:
@@ -60,17 +60,17 @@ spring:
 
 #         donor-service
         - id: donor-service-api-docs
-          uri: lb://donor-service
+          uri: lb://DONOR-SERVICE
           predicates:
             - Path=/donors/v3/**
 
         - id: donor-service-swagger
-          uri: lb://donor-service
+          uri: lb://DONOR-SERVICE
           predicates:
             - Path=/donor/swagger-ui/**
 
         - id: donor-service
-          uri: lb://donor-service
+          uri: lb://DONOR-SERVICE
           predicates:
             - Path=/api/v1/donor/**
           filters:
@@ -79,17 +79,17 @@ spring:
 #        request-service
 
         - id: request-service-api-docs
-          uri: lb://request-service
+          uri: lb://REQUEST-SERVICE
           predicates:
             - Path=/request/v3/**
 
         - id: request-service-swagger
-          uri: lb://request-service
+          uri: lb://REQUEST-SERVICE
           predicates:
             - Path=/request/swagger-ui/**
 
         - id: request-service
-          uri: lb://request-service
+          uri: lb://REQUEST-SERVICE
           predicates:
             - Path=/api/v1/request/**
           filters:
@@ -102,8 +102,3 @@ springdoc:
   api-docs:
     path: /v3/api-docs
     enabled: false
-
-
-
-
-
