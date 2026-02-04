@@ -27,7 +27,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-            log.info("Incoming request: {}", request.getURI());
+            log.info("Incoming request1111111111111111111111111111111111111111111111111111111111111: {}", request.getURI());
 
             String requestPath = request.getURI().getPath();
             if (requestPath.contains("/auth")
@@ -35,7 +35,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     || requestPath.contains("/v3/api-docs")
                     || requestPath.contains("index.html")
                     || requestPath.contains("/users/swagger-ui")
-                    || requestPath.contains("/matching/swagger-ui")) {
+            ) {
                 return chain.filter(exchange);
             }
 

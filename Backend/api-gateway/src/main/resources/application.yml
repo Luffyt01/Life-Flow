@@ -8,13 +8,12 @@ spring:
         locator:
           enable: true
           lower-case-service-id: true
-          url-expression: "'http://'+serviceId.toLowerCase()"
 
 
-    loadbalancer:
-      configurations: health-check
-      eureka:
-        enabled: true # Explicitly enable Eureka for the LoadBalancer
+#    loadbalancer:
+#      configurations: health-check
+#      eureka:
+#        enabled: true # Explicitly enable Eureka for the LoadBalancer
 
   profiles:
     active: dev
@@ -29,10 +28,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
-  endpoint:
-    health:
-      show-details: always
+        include: health,info
+
+#    health:
+#      show-details: always
+#    gateway:
+#      enabled: true
 
 eureka:
   client:
@@ -48,10 +49,10 @@ eureka:
     instance-id: api-gateway:8080
     prefer-ip-address: true
 
-logging:
-  level:
-    org.springframework.cloud.gateway: TRACE  # ← Change to TRACE for debugging
-    org.springframework.cloud.loadbalancer: DEBUG
-    com.netflix.discovery: DEBUG
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: TRACE  # ← Change to TRACE for debugging
+#    org.springframework.cloud.loadbalancer: DEBUG
+#    com.netflix.discovery: DEBUG
 
-user:endpoint: http://localhost:9020/users
+user.endpoint: http://localhost:9020/users
