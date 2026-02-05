@@ -1,12 +1,15 @@
 spring:
   application:
-    name: user_service
+    name: USER-SERVICE # Changed to uppercase to match Eureka registration
+
 
   security:
     oauth2:
       client:
         registration:
           google:
+            client-id:
+            client-secret:
             scope: openid,profile,email
 
   data:
@@ -21,16 +24,7 @@ spring:
     password: rocky
     driver-class-name: org.postgresql.Driver
 
-  jpa:
-    defer-datasource-initialization: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+
 
   mail:
     host: smtp.gmail.com
@@ -50,13 +44,6 @@ spring:
           ssl:
             trust: "*"
 
-springdoc:
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-  api-docs:
-    path: /v3/api-docs
-    enabled: true
 
 jwt:
   secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
@@ -69,20 +56,3 @@ backend:
 deploy:
   env: development
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-
-server:
-  port: 9020
-  servlet:
-    context-path: /users
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-  instance:
-    hostname: localhost
