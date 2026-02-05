@@ -2,36 +2,36 @@ spring:
   application:
     name: USER-SERVICE # Changed to uppercase to match Eureka registration
 
+
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: ${CLIENT_ID}
-            client-secret: ${CLIENT_SECRET}
+            client-id:
+            client-secret:
             scope: openid,profile,email
 
-            
 
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASS:}
+      password: ${REDIS_PASS}
 
   datasource:
-    url: ${JDBC_DATABASE_URL}
-    username: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/Life_flow
+    username: postgres
+    password: rocky
     driver-class-name: org.postgresql.Driver
 
 
 
   mail:
-    host: ${EMAIL_HOST:smtp.gmail.com}
-    port: ${EMAIL_PORT:587}
-    username: ${EMAIL_USERNAME}
-    password: ${EMAIL_PASSWORD}
+    host: smtp.gmail.com
+    port: 587
+    username: rockysheoran72@gmail.com
+    password: bebj fono wcrm acwx
     properties:
       mail:
         smtp:
@@ -46,26 +46,14 @@ spring:
             trust: "*"
 
 
-
 jwt:
-  secretKey: ${JWT_SECRET_KEY}
+  secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
 
 frontend:
-  url: ${FRONTEND_URL}
+  url: http://localhost:3000
 backend:
-  url: ${BACKEND_URL}
+  url: http://localhost:9020/users
 
 deploy:
-  env: ${DEPLOY_ENV}
-
-
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-    fetch-registry: true
-    register-with-eureka: true
-  instance:
-    prefer-ip-address: true
+  env: development
 
