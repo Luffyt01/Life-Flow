@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: REQUEST-SERVICE
+
+
+
+  # Datasource
+  datasource:
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+
+
+
+# JWT
+jwt:
+  secretKey: ${JWT_SECRET_KEY}
+
+# Deployment
+deploy:
+  env: development
+
+# Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL}

@@ -16,13 +16,18 @@ import java.util.List;
 import java.util.UUID;
 
 
-@RequestMapping("/inventory")
+@RequestMapping("/core")
 @RequiredArgsConstructor
 @RestController
 public class BloodInventoryController {
 
     private final InventoryServiceImpl inventoryService;
 //    private final JwtParser jwtParser;
+
+    @GetMapping("/demo")
+    public String Demo(){
+        return "Hello Inventory service";
+    }
 
     @PostMapping("/blood-bag")
     public ResponseEntity<BloodBagDto> createBloodInventory(HttpServletRequest req, @RequestBody @Valid BloodBagDto bloodBagDto) {

@@ -1,7 +1,7 @@
 spring:
   application:
-    name: user_service
-  
+    name: USER-SERVICE # Changed to uppercase to match Eureka registration
+
   security:
     oauth2:
       client:
@@ -23,16 +23,7 @@ spring:
     password: ${JDBC_DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-  jpa:
-    defer-datasource-initialization: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+
 
   mail:
     host: ${EMAIL_HOST:smtp.gmail.com}
@@ -52,11 +43,7 @@ spring:
           ssl:
             trust: "*"
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-  api-docs:
-    path: /v3/api-docs
+
 
 jwt:
   secretKey: ${JWT_SECRET_KEY}
@@ -69,13 +56,14 @@ backend:
 deploy:
   env: ${DEPLOY_ENV}
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
 
-server:
-  port: 9020
-  servlet:
-    context-path: /users
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+

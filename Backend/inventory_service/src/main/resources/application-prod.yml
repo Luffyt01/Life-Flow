@@ -1,0 +1,30 @@
+# Datasource
+datasource:
+  url: ${JDBC_DATABASE_URL}
+  username: ${JDBC_DATABASE_USERNAME}
+  password: ${JDBC_DATABASE_PASSWORD}
+  driver-class-name: org.postgresql.Driver
+
+
+
+
+
+# Deployment
+deploy:
+  env: production
+
+# Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL}
+
+data:
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASS}
+
+
+jwt:
+  secretKey: ${JWT_SECRET_KEY}

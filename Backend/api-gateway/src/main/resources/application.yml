@@ -1,37 +1,58 @@
 spring:
   application:
-     name: api-gateway
-
-# api gateway
+    name: api-gateway
 
   cloud:
     gateway:
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/v1/users/**
-          filters:
-            - stripPrefix=2
-
-        - id: geolocation-service
-          uri: lb://geolocation-service
-          predicates:
-            - Path=/api/v1/geolocations/**
-          filters:
-            - stripPrefix=2
-
-        - id: inventory-service
-          uri: lb://inventory-service
-          predicates:
-            - Path=/api/v1/inventory/**
-          filters:
-            - stripPrefix=2
+      discovery:
+        locator:
+          enable: true
+          lower-case-service-id: true
 
 
+#    loadbalancer:
+#      configurations: health-check
+#      eureka:
+#        enabled: true # Explicitly enable Eureka for the LoadBalancer
 
+  profiles:
+    active: dev
+
+  server:
+    port: 8080
+
+jwt:
+  secretKey:
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+#    health:
+#      show-details: always
+#    gateway:
+#      enabled: true
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    enabled: true
+    register-with-eureka: true
+    healthcheck:
+      enabled: true
+
+  instance:
+    instance-id: api-gateway:8080
+    prefer-ip-address: true
+
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: TRACE  # ← Change to TRACE for debugging
+#    org.springframework.cloud.loadbalancer: DEBUG
+#    com.netflix.discovery: DEBUG
+
+user.endpoint: http://localhost:9020/users
