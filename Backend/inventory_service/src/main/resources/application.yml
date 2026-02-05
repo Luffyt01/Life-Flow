@@ -1,16 +1,14 @@
-
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/postgres?useSSL=false
-    username: postgres
-    password: rocky
-    driver-class-name: org.postgresql.Driver
+  application:
+    name: INVENTORY-SERVICE
 
-  data:
-    redis:
-      host: ${REDIS_HOST:redis-13373.c212.ap-south-1-1.ec2.redns.redis-cloud.com}
-      port: ${REDIS_PORT:13373}
-      password: ${REDIS_PASS:Q7CT5spoOjGw6rq9CXeNgJ8FIzpgHizt}
+  profiles:
+    active: dev
+
+server:
+  port: 9060
+  servlet:
+    context-path: /inventory
 
 
   jpa:
@@ -25,6 +23,13 @@ spring:
         format_sql: true
 
 
-jwt:
-  secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
-#  secretKey: ${JWT_SECRET_KEY}
+
+logging:
+  level:
+    com:
+      project:
+        INVENTORY-SERVICE: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"

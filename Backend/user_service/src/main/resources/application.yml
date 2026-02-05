@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: USER-SERVICE # Changed to uppercase to match Eureka registration
+
+  profiles:
+    active: dev
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+server:
+  port: 9020
+  servlet:
+    context-path: /users
+
+  jpa:
+    defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    enabled: true
+
+  instance:  # ← CORRECT! This is at root level
+    instance-id: USER-SERVICE:9020
+    prefer-ip-address: true
+    hostname: localhost
+    ip-address: 127.0.0.1
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.cloud.loadbalancer: DEBUG
+    reactor.netty.http.client: DEBUG

@@ -36,7 +36,7 @@ build/
 application.properties
 
 # Ignore development configuration containing secrets
-/src/main/resources/application-dev.yml
+# /src/main/resources/application-dev.yml
 
 # Environment specific files
 *.env
