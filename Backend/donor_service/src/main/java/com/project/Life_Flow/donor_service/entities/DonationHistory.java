@@ -1,5 +1,6 @@
 package com.project.Life_Flow.donor_service.entities;
 
+import com.project.Life_Flow.donor_service.dto.enums.ComplicationsType;
 import com.project.Life_Flow.donor_service.entities.enums.AdverseEvents;
 import com.project.Life_Flow.donor_service.entities.enums.BloodType;
 import com.project.Life_Flow.donor_service.entities.enums.DonationStatus;
@@ -62,6 +63,7 @@ public class DonationHistory {
 
     @Enumerated(EnumType.STRING)
     private DonationStatus donationStatus;
+   private ComplicationsType complications ;
 
     private String bagBarcode;
 

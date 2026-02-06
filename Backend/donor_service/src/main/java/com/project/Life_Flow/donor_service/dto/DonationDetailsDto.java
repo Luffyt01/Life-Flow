@@ -16,5 +16,5 @@ public class DonationDetailsDto {
     private DonationHistory donationDetails;
     private Object healthMetrics; // Placeholder for a more specific DTO
     private String staffNotes;
-    private List<DonationHistory.Complication> complications;
+//    private List<DonationHistory.Complication> complications;
 }

@@ -6,10 +6,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-<<<<<<< HEAD
-=======
-import org.springframework.context.annotation.PropertySource;
->>>>>>> 7000dbe5da5246742079a2e3318e50c5703ef107
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;

@@ -36,8 +36,10 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     || requestPath.contains("index.html")
                     || requestPath.contains("/users/swagger-ui")
             ) {
+
                 return chain.filter(exchange);
             }
+
 
             final String tokenHeader = request.getHeaders().getFirst("Authorization");
 
