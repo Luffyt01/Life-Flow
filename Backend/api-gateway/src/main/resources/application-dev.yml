@@ -19,6 +19,7 @@ spring:
             - Path=/api/v1/users/**
           filters:
             - StripPrefix=2
+            - name: AuthenticationFilter
 
 
 #          Geolocation
@@ -38,6 +39,7 @@ spring:
             - Path=/api/v1/geolocations/**
           filters:
             - StripPrefix=2
+            - name: AuthenticationFilter
 
 #          Inventory-service
         - id: inventory-service-api-docs
@@ -56,6 +58,7 @@ spring:
             - Path=/api/v1/inventory/**
           filters:
             - StripPrefix=2
+            - name: AuthenticationFilter
 
 
 #         donor-service
@@ -75,6 +78,7 @@ spring:
             - Path=/api/v1/donor/**
           filters:
               - StripPrefix=2
+              - name: AuthenticationFilter
 
 #        request-service
 
@@ -94,6 +98,7 @@ spring:
             - Path=/api/v1/request/**
           filters:
             - StripPrefix=2
+            - name: AuthenticationFilter
 
 springdoc:
   swagger-ui:
