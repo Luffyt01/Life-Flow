@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/inventory")
+@RequestMapping("/expiry")
 @RequiredArgsConstructor
 public class ExpiryManagementController {
     private final ExpiryManagementServiceImpl expiryManagementServiceImp;

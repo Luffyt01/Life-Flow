@@ -127,7 +127,8 @@ public class GeoService {
         Point userLocation = createPoint(longitude, latitude);
 
         try {
-            List<HospitalProfileResponseDto> hospitals = userServiceClient.searchHospitals(null);
+//            List<HospitalProfileResponseDto> hospitals = userServiceClient.searchHospitals(null);
+            List<HospitalProfileResponseDto> hospitals = userServiceClient.findNearbyHospitals(latitude, longitude, radius_km);
 
             if (hospitals != null) {
                 for (HospitalProfileResponseDto hospital : hospitals) {

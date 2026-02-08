@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/inventory/centers")
+@RequestMapping("/centers")
 @RequiredArgsConstructor
 public class CollectionCenterController {
 
