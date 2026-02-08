@@ -44,10 +44,11 @@ public class AuthServiceImpl implements AuthService {
         logger.info("Attempting login for user: {}", logInDto.getEmail());
         try {
             UserEntity user1 = userRepository.findByEmail(logInDto.getEmail()).orElse(null);
+            logger.debug("user get : {} ", user1.toString());
             if(user1 == null || !user1.isEmail_verified()){
                 throw new UserOperationException("Invalid credential");
             }
-
+          logger.info("authentication ");
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(logInDto.getEmail(), logInDto.getPassword())
             );
