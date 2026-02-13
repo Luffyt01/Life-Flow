@@ -15,7 +15,6 @@ import com.project.inventory_service.exceptions.ExceptionTypes.RuntimeConflictEx
 import com.project.inventory_service.repositories.BloodInventoryRepository;
 import com.project.inventory_service.repositories.ExpiryManagementRepository;
 import com.project.inventory_service.service.InventoryService;
-import com.project.inventory_service.utils.JwtParser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

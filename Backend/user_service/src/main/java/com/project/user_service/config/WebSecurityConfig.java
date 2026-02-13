@@ -23,7 +23,19 @@ public class WebSecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
-
+    private static final String[] publicRoutes = {
+            "/error",
+            "/auth/**",
+            "/users/swagger-ui/**",
+            "/users/v3/api-docs/**",
+            "/users/swagger-ui.html",
+            "/matching/swagger-ui/**",
+            "/matching/v3/api-docs/**",
+            "/matching/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/actuator/health"
+    };
 
        @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
@@ -32,7 +44,7 @@ public class WebSecurityConfig {
             
             httpSecurity.authorizeHttpRequests(auth -> {
                         logger.debug("Configuring request matchers");
-                        auth.requestMatchers("/**").permitAll()
+                        auth.requestMatchers(publicRoutes).permitAll()
                                 .requestMatchers("/auth/get-me").authenticated()
                                 .anyRequest().authenticated();
 

@@ -3,6 +3,7 @@ package com.project.inventory_service.exceptions;
 import com.project.inventory_service.exceptions.ExceptionTypes.ResourceNotFoundException;
 import com.project.inventory_service.exceptions.ExceptionTypes.RuntimeConflictException;
 import com.project.inventory_service.exceptions.ExceptionTypes.ErrorInSavingDataInDatabase;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,6 +74,15 @@ public class GlobalExceptions {
                 .build();
         return buildApiErrorResponseEntity(error);
     }
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<?>> handleAuthenticationException(AuthenticationException ex){
+        ApiError error = ApiError.builder().
+                status(HttpStatus.UNAUTHORIZED)
+                .message(ex.getLocalizedMessage())
+                .build();
+        return buildApiErrorResponseEntity(error);
+    }
+
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

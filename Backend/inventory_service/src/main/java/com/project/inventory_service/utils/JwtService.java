@@ -16,7 +16,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class JwtParser {
+public class JwtService {
 
     @Value("${jwt.secretKey}")
     private String jwtSecretKey;
@@ -25,16 +25,16 @@ public class JwtParser {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken (){
-        return Jwts.builder()
-                .subject("6519660b-8855-404d-8ceb-b0890c5abe2f")
-                .claim("email","rockysheoran72@gmail.com")
-                .claim("role","DONOR")
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 10 hours
-                .signWith(getJwtSecretKey())
-                .compact();
-    }
+//    public String generateAccessToken (){
+//        return Jwts.builder()
+//                .subject("6519660b-8855-404d-8ceb-b0890c5abe2f")
+//                .claim("email","rockysheoran72@gmail.com")
+//                .claim("role","DONOR")
+//                .issuedAt(new Date())
+//                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 10 hours
+//                .signWith(getJwtSecretKey())
+//                .compact();
+//    }
 
     public String getUserIdFromToken(String token){
 //        log.warn(generateAccessToken());
@@ -60,8 +60,9 @@ public class JwtParser {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             // For testing purposes, if no token is present, return a default UUID or handle appropriately
             // In production, this should likely throw an exception or return null
-            log.warn("No valid Authorization header found. Using default UUID for testing.");
-            return UUID.fromString("6519660b-8855-404d-8ceb-b0890c5abe2f"); 
+//            log.warn("No valid Authorization header found. Using default UUID for testing.");
+//            return UUID.fromString("6519660b-8855-404d-8ceb-b0890c5abe2f");
+            return  null;
         }
         String token = authHeader.substring(7);
         return UUID.fromString(getUserIdFromToken(token));

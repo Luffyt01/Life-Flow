@@ -4,12 +4,12 @@ import com.project.inventory_service.dto.*;
 import com.project.inventory_service.entities.enums.BloodType;
 import com.project.inventory_service.entities.enums.StatusType;
 import com.project.inventory_service.service.impl.InventoryServiceImpl;
-import com.project.inventory_service.utils.JwtParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +19,7 @@ import java.util.UUID;
 @RequestMapping("/core")
 @RequiredArgsConstructor
 @RestController
+@PreAuthorize("hasRole('HOSPITAL')")
 public class BloodInventoryController {
 
     private final InventoryServiceImpl inventoryService;

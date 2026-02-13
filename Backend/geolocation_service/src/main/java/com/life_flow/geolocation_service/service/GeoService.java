@@ -118,7 +118,7 @@ public class GeoService {
         return response;
     }
 
-    public NearbyCentersResponse findNearbyCenters(double latitude, double longitude, double radius_km, String blood_type_needed, String urgency, Integer capacity_required) {
+    public NearbyCentersResponse findNearbyCenters(double latitude, double longitude, double radius_km, String blood_type_needed, String urgency, Integer capacity_required)    {
         log.info("Finding nearby centers for lat: {}, lon: {}, radius: {}", latitude, longitude, radius_km);
         NearbyCentersResponse response = new NearbyCentersResponse();
         response.setCenters(new ArrayList<>());
@@ -127,7 +127,8 @@ public class GeoService {
         Point userLocation = createPoint(longitude, latitude);
 
         try {
-            List<HospitalProfileResponseDto> hospitals = userServiceClient.searchHospitals(null);
+//            List<HospitalProfileResponseDto> hospitals = userServiceClient.searchHospitals(null);
+            List<HospitalProfileResponseDto> hospitals = userServiceClient.findNearbyHospitals(latitude, longitude, radius_km);
 
             if (hospitals != null) {
                 for (HospitalProfileResponseDto hospital : hospitals) {

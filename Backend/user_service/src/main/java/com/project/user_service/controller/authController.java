@@ -203,12 +203,7 @@ public class authController {
         return new ResponseEntity<>(new ResponseStringDto(message), HttpStatus.OK);
     }
 
-    @GetMapping("/get-me")
-    public ResponseEntity<UserDto> getUser(HttpServletRequest req) {
-        UserDto user = authService.getUser(req);
-        return new ResponseEntity<>(user, HttpStatus.OK);
 
-    }
 
 
 }

@@ -56,24 +56,9 @@ public class GeoController {
         return ResponseEntity.ok(geoService.findNearbyCenters(latitude, longitude, radius_km, blood_type_needed, urgency, capacity_required));
     }
 
-    @PostMapping("/coverage/analyze")
-    public ResponseEntity<CoverageAnalysisResponse> analyzeCoverage(@RequestBody CoverageAnalysisRequest request) {
-        return ResponseEntity.ok(geoService.analyzeCoverage(request));
-    }
 
-    @GetMapping("/donor/{donor_id}/location")
-    public ResponseEntity<DonorLocationResponse> getDonorLocation(
-            @PathVariable("donor_id") String donorId,
-            @RequestParam(required = false) String accuracy) {
-        return ResponseEntity.ok(geoService.getDonorLocation(donorId, accuracy));
-    }
 
-    @PutMapping("/donor/{donor_id}/location")
-    public ResponseEntity<UpdateLocationResponse> updateDonorLocation(
-            @PathVariable("donor_id") String donorId,
-            @RequestBody UpdateLocationRequest request) {
-        return ResponseEntity.ok(geoService.updateDonorLocation(donorId, request));
-    }
+
 
     @GetMapping("/requests/{request_id}/coverage")
     public ResponseEntity<RequestCoverageResponse> getRequestCoverage(
