@@ -9,6 +9,7 @@ import com.project.user_service.service.HospitalProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/profile/hospitals")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('HOSPITAL')")
 public class HospitalProfileController {
 
     private final HospitalProfileService hospitalProfileService;

@@ -56,10 +56,7 @@ public class GeoController {
         return ResponseEntity.ok(geoService.findNearbyCenters(latitude, longitude, radius_km, blood_type_needed, urgency, capacity_required));
     }
 
-    @PostMapping("/coverage/analyze")
-    public ResponseEntity<CoverageAnalysisResponse> analyzeCoverage(@RequestBody CoverageAnalysisRequest request) {
-        return ResponseEntity.ok(geoService.analyzeCoverage(request));
-    }
+
 
 
 

@@ -1,4 +1,4 @@
-package com.project.inventory_service.config;
+package com.project.Live_Flow.request_service.configs;
 
 import com.project.inventory_service.Security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;

@@ -2,11 +2,12 @@ package com.project.inventory_service.controllers;
 
 import com.project.inventory_service.dto.CollectionCenterDto;
 import com.project.inventory_service.service.CollectionCenterService;
-import com.project.inventory_service.utils.JwtParser;
+import com.project.inventory_service.utils.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,15 +17,16 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/centers")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('HOSPITAL')")
 public class CollectionCenterController {
 
     private final CollectionCenterService collectionCenterService;
-    private final JwtParser jwtParser;
+    private final JwtService jwtService;
 
     @PostMapping
     public ResponseEntity<CollectionCenterDto> createCollectionCenter(HttpServletRequest req, @RequestBody CollectionCenterDto dto) {
         log.info("Received request to create a new collection center");
-        UUID hospitalId = jwtParser.getUserId(req);
+        UUID hospitalId = jwtService.getUserId(req);
         dto.setHospitalId(hospitalId);
         return ResponseEntity.ok(collectionCenterService.createCollectionCenter(dto));
     }

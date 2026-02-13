@@ -4,12 +4,13 @@ import com.project.inventory_service.dto.TransactionRequestDto;
 import com.project.inventory_service.dto.TransactionResponseDto;
 import com.project.inventory_service.entities.enums.TransactionType;
 import com.project.inventory_service.service.InventoryTransactionService;
-import com.project.inventory_service.utils.JwtParser;
+import com.project.inventory_service.utils.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,10 +19,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/inventory")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('HOSPITAL')")
 public class InventoryTransactionController {
 
     private final InventoryTransactionService transactionService;
-    private final JwtParser jwtParser;
+    private final JwtService jwtService;
 
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponseDto> transferBloodUnits(
@@ -61,7 +63,7 @@ public class InventoryTransactionController {
     public ResponseEntity<List<TransactionResponseDto>> getTransactionsByType(
             HttpServletRequest request,
             @RequestParam(required = false) TransactionType type) {
-        UUID hospitalId = jwtParser.getUserId(request);
+        UUID hospitalId = jwtService.getUserId(request);
 
         return ResponseEntity.ok(transactionService.getTransactionsByType(hospitalId, type));
     }

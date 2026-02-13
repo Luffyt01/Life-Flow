@@ -5,13 +5,14 @@ import com.project.inventory_service.dto.StockSummaryDto;
 import com.project.inventory_service.dto.StockUpdateDto;
 import com.project.inventory_service.entities.enums.BloodType;
 import com.project.inventory_service.service.StockService;
-import com.project.inventory_service.utils.JwtParser;
+import com.project.inventory_service.utils.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.UUID;
 public class StockController {
 
     private final StockService stockService;
-    private final JwtParser jwtParser;
+    private final JwtService jwtService;
 
     @GetMapping("/{bloodType}")
     public ResponseEntity<StockResponseDto> getStockSummary(
@@ -57,7 +58,7 @@ public class StockController {
 
     @PostMapping("/update")
     public ResponseEntity<StockResponseDto> updateStock(HttpServletRequest req, @Valid @RequestBody StockUpdateDto updateDto) {
-        UUID userId = jwtParser.getUserId(req);
+        UUID userId = jwtService.getUserId(req);
         // If centerId is not in DTO, use userId. 
         if (updateDto.getCenterId() == null) {
             updateDto.setCenterId(userId);
@@ -93,7 +94,7 @@ public class StockController {
     @PostMapping("/initialize")
     public ResponseEntity<StockResponseDto> initializeStock(HttpServletRequest req, @Valid @RequestBody StockUpdateDto initDto) {
         log.info("Received stock initialization request: {}", initDto);
-        UUID userId = jwtParser.getUserId(req);
+        UUID userId = jwtService.getUserId(req);
         if (initDto.getCenterId() == null) {
             initDto.setCenterId(userId);
         }

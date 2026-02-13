@@ -3,10 +3,11 @@ package com.project.inventory_service.controllers;
 import com.project.inventory_service.dto.ExpiryManagementTableResponseDto;
 import com.project.inventory_service.entities.enums.AlertLevel;
 import com.project.inventory_service.service.impl.ExpiryManagementServiceImpl;
-import com.project.inventory_service.utils.JwtParser;
+import com.project.inventory_service.utils.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ExpiryManagementController {
     private final ExpiryManagementServiceImpl expiryManagementServiceImp;
-    private final JwtParser jwtParser;
+    private final JwtService jwtService;
 
     @GetMapping("/expiring-soon")
     public ResponseEntity<List<ExpiryManagementTableResponseDto>> getExpiringSoon(
@@ -34,7 +35,7 @@ public class ExpiryManagementController {
 
     @GetMapping("/expiry-alert")
     public ResponseEntity<List<ExpiryManagementTableResponseDto>> getExpiryManagementDataByAlert(HttpServletRequest req, @RequestParam AlertLevel alertLevel) {
-        UUID userId = jwtParser.getUserId(req);
+        UUID userId = jwtService.getUserId(req);
         List<ExpiryManagementTableResponseDto> searchedData = expiryManagementServiceImp.getExpiryManagementDataByAlert(userId, alertLevel);
         return ResponseEntity.ok(searchedData);
     }
@@ -48,7 +49,7 @@ public class ExpiryManagementController {
 
     @GetMapping("/all")
     public ResponseEntity<List<ExpiryManagementTableResponseDto>> getAllExpiryManagementTableData(HttpServletRequest req) {
-        UUID hospitalId = jwtParser.getUserId(req);
+        UUID hospitalId = jwtService.getUserId(req);
         List<ExpiryManagementTableResponseDto> allData = expiryManagementServiceImp.getAllExpiryManagementTableData(hospitalId);
         return ResponseEntity.ok(allData);
     }
