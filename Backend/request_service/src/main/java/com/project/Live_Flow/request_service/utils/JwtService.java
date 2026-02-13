@@ -45,15 +45,17 @@ public class JwtService {
         return claims.get("role", String.class); // Extract role claim
     }
 
-//    public UUID getUserId(HttpServletRequest request){
-//        String authHeader = request.getHeader("Authorization");
-//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//            // For testing purposes, if no token is present, return a default UUID or handle appropriately
-//            // In production, this should likely throw an exception or return null
+    public UUID getUserId(HttpServletRequest request){
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // For testing purposes, if no token is present, return a default UUID or handle appropriately
+            // In production, this should likely throw an exception or return null
 //            log.warn("No valid Authorization header found. Using default UUID for testing.");
 //            return UUID.fromString("6519660b-8855-404d-8ceb-b0890c5abe2f");
-//        }
-//        String token = authHeader.substring(7);
-//        return UUID.fromString(getUserIdFromToken(token));
-//    }
+            return  null;
+        }
+        String token = authHeader.substring(7);
+        return UUID.fromString(getUserIdFromToken(token));
+    }
+
 }

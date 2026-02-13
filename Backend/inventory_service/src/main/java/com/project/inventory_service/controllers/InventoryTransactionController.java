@@ -3,6 +3,7 @@ package com.project.inventory_service.controllers;
 import com.project.inventory_service.dto.TransactionRequestDto;
 import com.project.inventory_service.dto.TransactionResponseDto;
 import com.project.inventory_service.entities.enums.TransactionType;
+import com.project.inventory_service.exceptions.ExceptionTypes.AuthenticationException;
 import com.project.inventory_service.service.InventoryTransactionService;
 import com.project.inventory_service.utils.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,6 +65,9 @@ public class InventoryTransactionController {
             HttpServletRequest request,
             @RequestParam(required = false) TransactionType type) {
         UUID hospitalId = jwtService.getUserId(request);
+        if(hospitalId == null){
+            throw   new AuthenticationException("Invalid token");
+        }
 
         return ResponseEntity.ok(transactionService.getTransactionsByType(hospitalId, type));
     }

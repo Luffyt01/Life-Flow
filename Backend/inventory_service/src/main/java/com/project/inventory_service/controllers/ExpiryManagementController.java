@@ -2,6 +2,7 @@ package com.project.inventory_service.controllers;
 
 import com.project.inventory_service.dto.ExpiryManagementTableResponseDto;
 import com.project.inventory_service.entities.enums.AlertLevel;
+import com.project.inventory_service.exceptions.ExceptionTypes.AuthenticationException;
 import com.project.inventory_service.service.impl.ExpiryManagementServiceImpl;
 import com.project.inventory_service.utils.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +36,11 @@ public class ExpiryManagementController {
 
     @GetMapping("/expiry-alert")
     public ResponseEntity<List<ExpiryManagementTableResponseDto>> getExpiryManagementDataByAlert(HttpServletRequest req, @RequestParam AlertLevel alertLevel) {
-        UUID userId = jwtService.getUserId(req);
-        List<ExpiryManagementTableResponseDto> searchedData = expiryManagementServiceImp.getExpiryManagementDataByAlert(userId, alertLevel);
+        UUID hospitalId = jwtService.getUserId(req);
+        if(hospitalId == null){
+            throw   new AuthenticationException("Invalid token");
+        }
+        List<ExpiryManagementTableResponseDto> searchedData = expiryManagementServiceImp.getExpiryManagementDataByAlert(hospitalId, alertLevel);
         return ResponseEntity.ok(searchedData);
     }
 
@@ -50,6 +54,9 @@ public class ExpiryManagementController {
     @GetMapping("/all")
     public ResponseEntity<List<ExpiryManagementTableResponseDto>> getAllExpiryManagementTableData(HttpServletRequest req) {
         UUID hospitalId = jwtService.getUserId(req);
+        if(hospitalId == null){
+            throw   new AuthenticationException("Invalid token");
+        }
         List<ExpiryManagementTableResponseDto> allData = expiryManagementServiceImp.getAllExpiryManagementTableData(hospitalId);
         return ResponseEntity.ok(allData);
     }

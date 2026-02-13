@@ -1,6 +1,7 @@
 package com.project.inventory_service.controllers;
 
 import com.project.inventory_service.dto.CollectionCenterDto;
+import com.project.inventory_service.exceptions.ExceptionTypes.AuthenticationException;
 import com.project.inventory_service.service.CollectionCenterService;
 import com.project.inventory_service.utils.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,9 @@ public class CollectionCenterController {
     public ResponseEntity<CollectionCenterDto> createCollectionCenter(HttpServletRequest req, @RequestBody CollectionCenterDto dto) {
         log.info("Received request to create a new collection center");
         UUID hospitalId = jwtService.getUserId(req);
+        if(hospitalId == null){
+            throw   new AuthenticationException("Invalid token");
+        }
         dto.setHospitalId(hospitalId);
         return ResponseEntity.ok(collectionCenterService.createCollectionCenter(dto));
     }
