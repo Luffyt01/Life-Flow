@@ -1,7 +1,7 @@
 package com.project.Live_Flow.request_service.Security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.inventory_service.exceptions.ApiError;
+import com.project.Live_Flow.request_service.exception.ApiError;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,8 +21,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
         ApiError error = ApiError.builder()
-                .status(HttpStatus.FORBIDDEN)
-                .message("You are not authorized to access this resource.")
+                .statusCode(HttpStatus.FORBIDDEN)
+                .error("You are not authorized to access this resource.")
                 .build();
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
