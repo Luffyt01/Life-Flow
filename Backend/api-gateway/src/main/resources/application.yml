@@ -22,7 +22,7 @@ spring:
     port: 8080
 
 jwt:
-  secretKey: sdfhsbhfshfbhsdhfb27i6423brrbuiyff
+  secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
 
 management:
   endpoints:

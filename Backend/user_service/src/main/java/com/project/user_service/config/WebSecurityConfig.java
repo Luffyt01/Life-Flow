@@ -2,7 +2,10 @@ package com.project.user_service.config;
 
 import com.project.user_service.handler.OAuth2SuccessHandler;
 import com.project.user_service.security.JwtAuthFilter;
+import com.project.user_service.security.CustomAccessDeniedHandler;
+
 import lombok.RequiredArgsConstructor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -17,9 +20,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true)
+@EnableMethodSecurity
 public class WebSecurityConfig {
     private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     private final JwtAuthFilter jwtAuthFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -64,6 +68,8 @@ public class WebSecurityConfig {
                         oauth2Config.failureUrl("/auth/login?error=true")
                                 .successHandler(oAuth2SuccessHandler);
                     })
+                    .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler))
+
             ;
 
             logger.info("Security filter chain configuration completed successfully");
