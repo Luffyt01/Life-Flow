@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: INVENTORY-SERVICE
+# Datasource
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Life_flow
+    username: postgres
+    password: rocky
+    driver-class-name: org.postgresql.Driver
+
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASS}
+
+
+# Deployment
+deploy:
+  env: development
+
+# Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    enabled: true
+
+  instance:  # ← CORRECT! This is at root level
+    instance-id: INVENTORY-SERVICE:9060
+    prefer-ip-address: true
+    hostname: localhost
+    ip-address: 127.0.0.1
+
+jwt:
+  secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823

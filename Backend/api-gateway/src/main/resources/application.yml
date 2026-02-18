@@ -6,14 +6,15 @@ spring:
     gateway:
       discovery:
         locator:
-          enable: true
+          enabled: true
           lower-case-service-id: true
-
-
-#    loadbalancer:
-#      configurations: health-check
-#      eureka:
-#        enabled: true # Explicitly enable Eureka for the LoadBalancer
+      routes:
+        - id: openapi
+          uri: http://localhost:${server.port}
+          predicates:
+            - Path=/v3/api-docs/**
+          filters:
+            - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
 
   profiles:
     active: dev
@@ -22,18 +23,13 @@ spring:
     port: 8080
 
 jwt:
-  secretKey: sdfhsbhfshfbhsdhfb27i6423brrbuiyff
+  secretKey: paiosdfqg43j51b4hjbhcafifa87dsf6hk32jhkrj9a7dfhkjhalkasdf97823
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
-#    health:
-#      show-details: always
-#    gateway:
-#      enabled: true
 
 eureka:
   client:
@@ -49,10 +45,12 @@ eureka:
     instance-id: api-gateway:8080
     prefer-ip-address: true
 
-#logging:
-#  level:
-#    org.springframework.cloud.gateway: TRACE  # ← Change to TRACE for debugging
-#    org.springframework.cloud.loadbalancer: DEBUG
-#    com.netflix.discovery: DEBUG
-
 user.endpoint: http://localhost:9020/users
+
+springdoc:
+  swagger-ui:
+    urls-primary-name: apis
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+  api-docs:
+    path: /v3/api-docs

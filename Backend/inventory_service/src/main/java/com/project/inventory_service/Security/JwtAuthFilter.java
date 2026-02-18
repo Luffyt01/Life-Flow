@@ -24,6 +24,7 @@ import java.util.Collections;
 @Component
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
+
     private final JwtService jwtService;
 
     @Autowired
@@ -44,6 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = requestTokenHeader.substring(7);
             String userId = jwtService.getUserIdFromToken(token);
             String role = jwtService.getRoleFromToken(token);
+            logger.info(role);
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UsernamePasswordAuthenticationToken authToken =
